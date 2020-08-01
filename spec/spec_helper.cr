@@ -1,8 +1,8 @@
 require "spec"
-require "../token"
-require "../lexer"
-require "../parser"
-require "../ast"
+require "../src/token"
+require "../src/lexer"
+require "../src/parser"
+require "../src/ast"
 
 def test_statement(statement : AST::Statement)
   fail("Unhandled test_statement: #{statement.class}")
