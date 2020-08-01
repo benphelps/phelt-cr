@@ -8,4 +8,10 @@ dependencies:
 authors:
   - Ben Phelps <ben@phelps.io>
 
+targets:
+  phelt:
+    main: src/phelt.cr
+
+crystal: 0.35.1
+
 license: MIT
