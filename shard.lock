@@ -1,0 +1,6 @@
+version: 2.0
+shards:
+  debug:
+    git: https://github.com/Sija/debug.cr.git
+    version: 2.0.0
+

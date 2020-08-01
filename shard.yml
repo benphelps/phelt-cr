@@ -1,0 +1,11 @@
+name: phelt
+version: 0.1.0
+
+dependencies:
+  debug:
+    github: Sija/debug.cr
+
+authors:
+  - Ben Phelps <ben@phelps.io>
+
+license: MIT
