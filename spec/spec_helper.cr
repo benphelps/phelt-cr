@@ -31,7 +31,7 @@ def test_literal(literal : AST::Identifier, value : String)
   literal.token_literal.should eq("#{value}")
 end
 
-def test_literal(literal : AST::IntegerLiteral, value : Int32)
+def test_literal(literal : AST::IntegerLiteral, value : Int64)
   literal.value.should eq(value)
   literal.token_literal.should eq("#{value}")
 end

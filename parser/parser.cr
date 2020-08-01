@@ -145,10 +145,10 @@ module Parser
     def register_parser_integer_literal
       parser = PrefixParser.new do
         token = @cur_token
-        value = @cur_token.literal.to_i
+        value = @cur_token.literal.to_i64
 
         unless value
-          error = "could not parse #{@cur_token.literal} as an Int32"
+          error = "could not parse #{@cur_token.literal} as an Int64"
           @errors << error
           return AST::ErrorExpression.new(token, error)
         end

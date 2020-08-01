@@ -3,7 +3,7 @@ require "./spec_helper"
 describe "Parser" do
   it "should parse let statements" do
     tests = [
-      {:input => "let x = 5;", :identifier => "x", :value => 5},
+      {:input => "let x = 5;", :identifier => "x", :value => 5_i64},
       {:input => "let y = true;", :identifier => "y", :value => true},
       {:input => "let foobar = y;", :identifier => "foobar", :value => "y"},
     ]
@@ -25,7 +25,7 @@ describe "Parser" do
 
   it "should parse return statements" do
     tests = [
-      {:input => "return 5;", :value => 5},
+      {:input => "return 5;", :value => 5_i64},
       {:input => "return true;", :value => true},
       {:input => "return foobar;", :value => "foobar"},
     ]
@@ -98,7 +98,7 @@ describe "Parser" do
     literal = statement.expression.as(AST::IntegerLiteral)
 
     statement.should be_a(AST::ExpressionStatement)
-    test_literal(literal, 5)
+    test_literal(literal, 5_i64)
   end
 
   it "should parse boolean literals" do
@@ -120,9 +120,9 @@ describe "Parser" do
 
   it "should parse prefix expressions" do
     tests = [
-      {:input => "!5;", :operator => "!", :value => 5},
+      {:input => "!5;", :operator => "!", :value => 5_i64},
       {:input => "!5.5;", :operator => "!", :value => 5.5},
-      {:input => "-15;", :operator => "-", :value => 15},
+      {:input => "-15;", :operator => "-", :value => 15_i64},
       {:input => "-15.5;", :operator => "-", :value => 15.5},
       {:input => "!true;", :operator => "!", :value => true},
       {:input => "!false;", :operator => "!", :value => false},
@@ -149,14 +149,14 @@ describe "Parser" do
 
   it "should parse infix expressions" do
     tests = [
-      {:input => "5 + 5;", :left => 5, :operator => "+", :right => 5},
-      {:input => "5 - 5;", :left => 5, :operator => "-", :right => 5},
-      {:input => "5 * 5;", :left => 5, :operator => "*", :right => 5},
-      {:input => "5 / 5;", :left => 5, :operator => "/", :right => 5},
-      {:input => "5 > 5;", :left => 5, :operator => ">", :right => 5},
-      {:input => "5 < 5;", :left => 5, :operator => "<", :right => 5},
-      {:input => "5 == 5;", :left => 5, :operator => "==", :right => 5},
-      {:input => "5 != 5;", :left => 5, :operator => "!=", :right => 5},
+      {:input => "5 + 5;", :left => 5_i64, :operator => "+", :right => 5_i64},
+      {:input => "5 - 5;", :left => 5_i64, :operator => "-", :right => 5_i64},
+      {:input => "5 * 5;", :left => 5_i64, :operator => "*", :right => 5_i64},
+      {:input => "5 / 5;", :left => 5_i64, :operator => "/", :right => 5_i64},
+      {:input => "5 > 5;", :left => 5_i64, :operator => ">", :right => 5_i64},
+      {:input => "5 < 5;", :left => 5_i64, :operator => "<", :right => 5_i64},
+      {:input => "5 == 5;", :left => 5_i64, :operator => "==", :right => 5_i64},
+      {:input => "5 != 5;", :left => 5_i64, :operator => "!=", :right => 5_i64},
       {:input => "5.5 + 5.5;", :left => 5.5, :operator => "+", :right => 5.5},
       {:input => "5.5 - 5.5;", :left => 5.5, :operator => "-", :right => 5.5},
       {:input => "5.5 * 5.5;", :left => 5.5, :operator => "*", :right => 5.5},
@@ -378,8 +378,8 @@ describe "Parser" do
 
     expression.arguments.size.should eq(3)
 
-    test_literal(expression.arguments[0], 1)
+    test_literal(expression.arguments[0], 1_i64)
     test_infix(expression.arguments[1], 2.3, "*", 3.4)
-    test_infix(expression.arguments[2], 4, "+", 5)
+    test_infix(expression.arguments[2], 4_i64, "+", 5_i64)
   end
 end

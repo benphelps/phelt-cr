@@ -3,7 +3,7 @@ require "../token"
 module AST
   class IntegerLiteral < Expression
     property token : Token::Token
-    property value : Int32
+    property value : Int64
 
     def initialize(@token, @value)
     end
