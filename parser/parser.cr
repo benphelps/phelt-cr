@@ -42,6 +42,7 @@ module Parser
     def initialize(@lexer : Lexer::Lexer)
       register_parser_identifier
       register_parser_integer_literal
+      register_parser_float_literal
       register_parser_boolean_literal
       register_parser_prefix_expression
       register_parser_infix_expression

@@ -88,6 +88,10 @@ module Lexer
           return token
         elsif ::Lexer.is_number?(@char)
           literal = read_number()
+          if literal =~ /\d+.\d+/
+            token = new_token(Token::FLOAT, literal)
+            return token
+          end
           token = new_token(Token::INT, literal)
           return token
         end
@@ -107,8 +111,10 @@ module Lexer
     end
 
     def read_number
+      have_decimal = false
       position = @position
-      while ::Lexer.is_number?(@char)
+      while ::Lexer.is_number?(@char) || (have_decimal == false && @char == '.')
+        have_decimal = true if @char == '.'
         read_char()
       end
       @input[position..@position - 1]

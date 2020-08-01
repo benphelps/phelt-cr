@@ -31,6 +31,7 @@ module Token
   # Identifiers and literals
   IDENT = Token.new("IDENT", "IDENT")
   INT   = Token.new("INT", "INT")
+  FLOAT = Token.new("FLOAT", "FLOAT")
 
   # Operators
   ASSIGN   = Token.new("ASSIGN", "=")

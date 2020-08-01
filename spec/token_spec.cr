@@ -30,6 +30,7 @@ describe Lexer::Lexer do
   it_lexes "five", Token::IDENT, "five"
   it_lexes "=", Token::ASSIGN
   it_lexes "5", Token::INT, "5"
+  it_lexes "5.5", Token::FLOAT, "5.5"
   it_lexes ";", Token::SEMICOLON
   it_lexes "if", Token::IF
   it_lexes "else", Token::ELSE

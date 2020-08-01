@@ -17,6 +17,22 @@ module AST
     end
   end
 
+  class FloatLiteral < Expression
+    property token : Token::Token
+    property value : Float64
+
+    def initialize(@token, @value)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      @token.literal
+    end
+  end
+
   class BooleanLiteral < Expression
     property token : Token::Token
     property value : Bool

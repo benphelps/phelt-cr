@@ -121,7 +121,9 @@ describe "Parser" do
   it "should parse prefix expressions" do
     tests = [
       {:input => "!5;", :operator => "!", :value => 5},
+      {:input => "!5.5;", :operator => "!", :value => 5.5},
       {:input => "-15;", :operator => "-", :value => 15},
+      {:input => "-15.5;", :operator => "-", :value => 15.5},
       {:input => "!true;", :operator => "!", :value => true},
       {:input => "!false;", :operator => "!", :value => false},
     ]
@@ -155,6 +157,14 @@ describe "Parser" do
       {:input => "5 < 5;", :left => 5, :operator => "<", :right => 5},
       {:input => "5 == 5;", :left => 5, :operator => "==", :right => 5},
       {:input => "5 != 5;", :left => 5, :operator => "!=", :right => 5},
+      {:input => "5.5 + 5.5;", :left => 5.5, :operator => "+", :right => 5.5},
+      {:input => "5.5 - 5.5;", :left => 5.5, :operator => "-", :right => 5.5},
+      {:input => "5.5 * 5.5;", :left => 5.5, :operator => "*", :right => 5.5},
+      {:input => "5.5 / 5.5;", :left => 5.5, :operator => "/", :right => 5.5},
+      {:input => "5.5 > 5.5;", :left => 5.5, :operator => ">", :right => 5.5},
+      {:input => "5.5 < 5.5;", :left => 5.5, :operator => "<", :right => 5.5},
+      {:input => "5.5 == 5.5;", :left => 5.5, :operator => "==", :right => 5.5},
+      {:input => "5.5 != 5.5;", :left => 5.5, :operator => "!=", :right => 5.5},
       {:input => "true == true;", :left => true, :operator => "==", :right => true},
       {:input => "true != false;", :left => true, :operator => "!=", :right => false},
       {:input => "false == false;", :left => false, :operator => "==", :right => false},
@@ -203,6 +213,7 @@ describe "Parser" do
       {:input => "(5 + 5) * 2", :output => "((5 + 5) * 2)"},
       {:input => "2 / (5 + 5)", :output => "(2 / (5 + 5))"},
       {:input => "-(5 + 5)", :output => "(-(5 + 5))"},
+      {:input => "-(5.5 + 5.5)", :output => "(-(5.5 + 5.5))"},
       {:input => "!(true == true)", :output => "(!(true == true))"},
       {:input => "a + add(b * c) + d", :output => "((a + add((b * c))) + d)"},
       {:input => "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", :output => "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"},
@@ -348,7 +359,7 @@ describe "Parser" do
   end
 
   it "TestCallExpressionParsing" do
-    input = "add(1, 2 * 3, 4 + 5);"
+    input = "add(1, 2.3 * 3.4, 4 + 5);"
 
     lexer = Lexer::Lexer.new(input)
     parser = Parser::Parser.new(lexer)
@@ -368,7 +379,7 @@ describe "Parser" do
     expression.arguments.size.should eq(3)
 
     test_literal(expression.arguments[0], 1)
-    test_infix(expression.arguments[1], 2, "*", 3)
+    test_infix(expression.arguments[1], 2.3, "*", 3.4)
     test_infix(expression.arguments[2], 4, "+", 5)
   end
 end
