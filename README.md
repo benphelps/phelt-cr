@@ -1,5 +1,7 @@
 # phelt
 
+[![Build Status](https://travis-ci.com/benphelps/phelt.svg?branch=master)](https://travis-ci.com/benphelps/phelt)
+
 phelt is a toy programming languag.
 
 ## Installation
