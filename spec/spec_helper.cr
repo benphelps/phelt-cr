@@ -1,4 +1,5 @@
 require "spec"
+require "../src/object"
 require "../src/token"
 require "../src/lexer"
 require "../src/parser"
