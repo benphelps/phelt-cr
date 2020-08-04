@@ -88,7 +88,7 @@ module Lexer
           return token
         elsif ::Lexer.is_number?(@char)
           literal = read_number()
-          if literal =~ /\d+.\d+/
+          if literal =~ /\d+\.\d+/
             token = new_token(Token::FLOAT, literal)
             return token
           end
