@@ -63,7 +63,7 @@ module Parser
 
     def parse_program
       program = AST::Program.new([] of AST::Statement)
-      while @cur_token != Token::EOF
+      while @cur_token.type != Token::EOF.type
         statement = parse_statement()
         # debug!(statement)
         unless statement.nil?
@@ -179,7 +179,7 @@ module Parser
     def register_parser_boolean_literal
       parser = PrefixParser.new do
         token = @cur_token
-        value = @cur_token.is_a?(Token::TRUE)
+        value = @cur_token.type == Token::TRUE.type
 
         AST::BooleanLiteral.new(token, value)
       end
