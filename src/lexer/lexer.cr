@@ -5,10 +5,14 @@ module Lexer
     @position : Int32
     @read_position : Int32
     @char : Char
+    @line : Int32
+    @column : Int32
 
     def initialize(@input : String)
       @position = 0
       @read_position = 0
+      @line = 1
+      @column = 1
       @char = Char::ZERO
       read_char()
     end
@@ -19,6 +23,14 @@ module Lexer
       else
         @char = @input[@read_position]
       end
+
+      if @char == "\n"
+        @line += 1
+        @column = 1
+      else
+        @column += 1
+      end
+
       @position = @read_position
       @read_position += 1
     end
@@ -127,7 +139,7 @@ module Lexer
     end
 
     def new_token(token : Token::Token, literal : String | Char)
-      Token::Token.new(token.type, literal.to_s)
+      Token::Token.new(token.type, literal.to_s, @line, @column)
     end
   end
 

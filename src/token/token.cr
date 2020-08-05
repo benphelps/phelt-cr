@@ -2,9 +2,9 @@ module Token
   alias Type = String
 
   struct Token
-    getter type, literal
+    getter type, literal, line, column
 
-    def initialize(@type : Type, @literal : String)
+    def initialize(@type : Type, @literal : String, @line : Int32 = 0, @column : Int32 = 0)
     end
   end
 
