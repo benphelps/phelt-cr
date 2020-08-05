@@ -14,7 +14,11 @@ OptionParser.parse do |parser|
     exit
   end
 
-  parser.on "-d", "--debugger", "Show help" do
+  parser.on "-d", "--debugger", "Interactive Debugger" do
     REPL::Debugger.start
+  end
+
+  parser.on "-i", "--interactive", "Interactive REPL" do
+    REPL::REPL.start
   end
 end

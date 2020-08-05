@@ -10,6 +10,8 @@ module PheltObject
     abstract def inspect
   end
 
+  alias Number = Integer | Float
+
   class Integer < Object
     property value : Int64
 
@@ -65,8 +67,24 @@ module PheltObject
     end
   end
 
+  class Return < Object
+    property value : Object
+
+    def initialize(@value)
+    end
+
+    def type
+      RETURN
+    end
+
+    def inspect
+      @value.inspect
+    end
+  end
+
   INTEGER = Type.new("INTEGER")
   FLOAT   = Type.new("FLOAT")
   BOOLEAN = Type.new("BOOLEAN")
   NULL    = Type.new("NULL")
+  RETURN  = Type.new("RETURN")
 end

@@ -4,6 +4,7 @@ require "../src/token"
 require "../src/lexer"
 require "../src/parser"
 require "../src/ast"
+require "../src/evaluator"
 
 def test_statement(statement : AST::Statement)
   fail("Unhandled test_statement: #{statement.class}")
