@@ -2,6 +2,8 @@ require "../token"
 
 module AST
   class EmptyExpression < Expression
+    property token : Token::Token = Token::EMPTY
+
     def token_literal
       ""
     end

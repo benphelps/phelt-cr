@@ -6,20 +6,17 @@ module PheltObject
     end
   end
 
-  abstract class Object
-    abstract def inspect
-  end
-
   alias Number = Integer | Float
+  alias Object = Integer | Float | Boolean | Error | Null | Return
 
-  class Integer < Object
+  class Integer
     property value : Int64
 
     def initialize(@value)
     end
 
     def type
-      INTEGER
+      "number"
     end
 
     def inspect
@@ -27,14 +24,14 @@ module PheltObject
     end
   end
 
-  class Float < Object
+  class Float
     property value : Float64
 
     def initialize(@value)
     end
 
     def type
-      FLOAT
+      "number"
     end
 
     def inspect
@@ -42,14 +39,14 @@ module PheltObject
     end
   end
 
-  class Boolean < Object
+  class Boolean
     property value : Bool
 
     def initialize(@value)
     end
 
     def type
-      BOOLEAN
+      "boolean"
     end
 
     def inspect
@@ -57,9 +54,9 @@ module PheltObject
     end
   end
 
-  class Null < Object
+  class Null
     def type
-      NULL
+      "null"
     end
 
     def inspect
@@ -67,14 +64,14 @@ module PheltObject
     end
   end
 
-  class Return < Object
+  class Return
     property value : Object
 
     def initialize(@value)
     end
 
     def type
-      RETURN
+      "return"
     end
 
     def inspect
@@ -82,9 +79,21 @@ module PheltObject
     end
   end
 
-  INTEGER = Type.new("INTEGER")
-  FLOAT   = Type.new("FLOAT")
-  BOOLEAN = Type.new("BOOLEAN")
-  NULL    = Type.new("NULL")
-  RETURN  = Type.new("RETURN")
+  class Error
+    property message : String
+    property pretty : String
+    property line : Int32
+    property column : Int32
+
+    def initialize(@message, @pretty, @line, @column)
+    end
+
+    def type
+      "error"
+    end
+
+    def inspect
+      @pretty
+    end
+  end
 end

@@ -40,7 +40,7 @@ private def test_object(object : PheltObject::Null)
 end
 
 describe "Evaluator" do
-  it "TestEvalLiteralExpression" do
+  it "should eval literal expressions" do
     tests = [
       {:input => "5", :expected => 5_i64},
       {:input => "10", :expected => 10_i64},
@@ -78,7 +78,7 @@ describe "Evaluator" do
     end
   end
 
-  it "TestEvalIfElseExpression" do
+  it "should eval if expressions" do
     tests = [
       {:input => "if (true) { 10 }", :expected => 10_i64},
       {:input => "if (false) { 10 }", :expected => nil},
@@ -99,13 +99,13 @@ describe "Evaluator" do
     end
   end
 
-  it "TestReturnStatements" do
+  it "should eval return statements" do
     tests = [
       {:input => "return 10;", :expected => 10_i64},
       {:input => "return 10; 9;", :expected => 10_i64},
       {:input => "return 5 + 5; 9;", :expected => 10_i64},
       {:input => "9; return 5 + 5; 9", :expected => 10_i64},
-      {:input => "if (10 > 1) { if (10 > 1) { return 10; } return 1; }", :expected => 10_i64},
+      {:input => "if (5 > 2) { if (2 < 5) { return 10; } return 1; }", :expected => 10_i64},
     ]
 
     tests.each do |test|
@@ -115,6 +115,23 @@ describe "Evaluator" do
       else
         test_object(evaluated)
       end
+    end
+  end
+
+  it "should handle errors" do
+    tests = [
+      {:input => "if (5 > true) {\n  return true;\n}", :expected => "Expected number, got boolean"},
+      {:input => "if (true > 5) {\n  return true;\n}", :expected => "Expected boolean, got number"},
+      {:input => "if (5 > 1) {\n  return true + 5;\n}", :expected => "Expected boolean, got number"},
+      {:input => "if (10 > 5) {\n  return -true;\n}", :expected => "Unkown operator -boolean"},
+      {:input => "if (10 > 5) {\n  return true + false;\n}", :expected => "Unkown operator boolean + boolean"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      evaluated.should be_a(PheltObject::Error)
+      error = evaluated.as(PheltObject::Error)
+      error.message.should eq(test[:expected])
     end
   end
 end

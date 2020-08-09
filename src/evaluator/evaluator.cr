@@ -7,11 +7,15 @@ module Evaluator
   class Evaluator
     property program : AST::Program
 
+    @current_token : Token::Token = Token::EMPTY
+    @current_block : Array(AST::Statement)
+
     NULL  = PheltObject::Null.new
     TRUE  = PheltObject::Boolean.new(true)
     FALSE = PheltObject::Boolean.new(false)
 
     def initialize(@program)
+      @current_block = @program.statements
     end
 
     def eval
@@ -23,26 +27,41 @@ module Evaluator
       when AST::Program
         return eval_program(node.statements)
       when AST::ExpressionStatement
+        @current_token = node.token
         return eval(node.expression)
       when AST::IntegerLiteral
         return PheltObject::Integer.new(node.value)
       when AST::FloatLiteral
         return PheltObject::Float.new(node.value)
       when AST::BooleanLiteral
+        @current_token = node.token
         return bool_to_boolean(node.value)
       when AST::PrefixExpression
+        @current_token = node.right.token
         right = eval(node.right)
+        return right if error?(right)
         return eval_prefix_expression(node.operator, right)
       when AST::InfixExpression
+        @current_token = node.left.token
         left = eval(node.left)
+        return left if error?(left)
+        @current_token = node.right.token
         right = eval(node.right)
+        return right if error?(right)
         return eval_infix_expression(node.operator, left, right)
       when AST::BlockStatement
         return eval_block_statement(node)
       when AST::IfExpression
+        @current_token = node.condition.token
         return eval_if_expression(node)
       when AST::ReturnStatement
+        @current_token = node.token
         value = eval(node.return_value)
+        return value if error?(value)
+        return PheltObject::Return.new(value)
+      when AST::LetStatement
+        value = eval(node.value)
+        return value if error?(value)
         return PheltObject::Return.new(value)
       else
         return NULL
@@ -72,6 +91,7 @@ module Evaluator
 
     def eval_if_expression(expression : AST::IfExpression)
       condition = eval(expression.condition)
+      return condition if error?(condition)
       if truthy?(condition)
         return eval(expression.consequence)
       elsif expression.alternative
@@ -84,10 +104,15 @@ module Evaluator
     def eval_program(statements : Array(AST::Statement))
       result = NULL
 
+      @current_block = statements
+
       statements.each do |statement|
+        @current_token = statement.token
         result = eval(statement)
         if result.is_a? PheltObject::Return
           return result.value
+        elsif result.is_a? PheltObject::Error
+          return result
         end
       end
 
@@ -97,10 +122,13 @@ module Evaluator
     def eval_block_statement(block : AST::BlockStatement)
       result = NULL
 
+      @current_block = block.statements
+
       block.statements.each do |statement|
+        @current_token = statement.token
         result = eval(statement)
 
-        if result.is_a?(PheltObject::Return)
+        if result.is_a? PheltObject::Return | PheltObject::Error
           return result
         end
       end
@@ -135,12 +163,16 @@ module Evaluator
     def eval_minus_prefix_operator_expression(right : PheltObject::Object)
       return PheltObject::Integer.new(-right.value) if right.is_a? PheltObject::Integer
       return PheltObject::Float.new(-right.value) if right.is_a? PheltObject::Float
-      return NULL
+      return error("Unkown operator -#{right.type}")
     end
 
     def eval_infix_expression(operator : String, left : PheltObject::Object, right : PheltObject::Object)
-      if (left.is_a?(PheltObject::Integer) || left.is_a?(PheltObject::Float)) && (right.is_a?(PheltObject::Integer) || right.is_a?(PheltObject::Float))
+      if left.is_a?(PheltObject::Number) && right.is_a?(PheltObject::Number)
         return eval_number_infix_expression(operator, left, right)
+      end
+
+      if left.class != right.class
+        return error("Expected #{left.type}, got #{right.type}")
       end
 
       if operator == "=="
@@ -151,11 +183,11 @@ module Evaluator
         return bool_to_boolean(left != right)
       end
 
-      return NULL
+      return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
     def eval_number_infix_expression(operator : String, left : PheltObject::Number, right : PheltObject::Number)
-      if (left.is_a?(PheltObject::Integer) || left.is_a?(PheltObject::Float)) && (right.is_a?(PheltObject::Integer) || right.is_a?(PheltObject::Float))
+      if left.is_a?(PheltObject::Number) && right.is_a?(PheltObject::Number)
         left_val = left.value
         right_val = right.value
 
@@ -177,40 +209,34 @@ module Evaluator
         when "!="
           value = left_val != right_val
         else
-          value = NULL
+          value = error("Unkown operator #{left.type} #{operator} #{right.type}")
         end
 
         return PheltObject::Integer.new(value.to_i64) if value.is_a? Int
         return PheltObject::Float.new(value.to_f64) if value.is_a? Float
         return bool_to_boolean(value) if value.is_a? Bool
-        return NULL
       end
-      return NULL
+      return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
-    def eval_boolean_infix_expression(operator : String, left : PheltObject::Number, right : PheltObject::Number)
-      if (left.is_a?(PheltObject::Integer) || left.is_a?(PheltObject::Float)) && (right.is_a?(PheltObject::Integer) || right.is_a?(PheltObject::Float))
-        left_val = left.value
-        right_val = right.value
+    def error?(value)
+      return true if value.is_a? PheltObject::Error
+      return false
+    end
 
-        case operator
-        when "+"
-          value = left_val + right_val
-        when "-"
-          value = left_val - right_val
-        when "*"
-          value = left_val * right_val
-        when "/"
-          value = left_val / right_val
-        else
-          value = NULL
-        end
+    def error(error : String)
+      pretty = "\nEvaluation Error: #{error}".colorize(:red).to_s + "\n\n"
 
-        return PheltObject::Integer.new(value.to_i64) if value.is_a? Int
-        return PheltObject::Float.new(value.to_f64) if value.is_a? Float
-        return NULL
-      end
-      return NULL
+      lines = @program.orig.as(String).lines
+      line = "  #{@current_token.line} | "
+      error_line = @current_token.line - 1
+
+      pretty += "#{line.colorize(:dark_gray).to_s}#{lines[error_line]}\n"
+      pretty += (" " * ((@current_token.column - 1) + line.size)) + "^".colorize(:green).to_s
+
+      pretty += "\n"
+
+      PheltObject::Error.new(error, pretty, @current_token.line, @current_token.column)
     end
   end
 end

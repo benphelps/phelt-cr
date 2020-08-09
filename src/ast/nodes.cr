@@ -2,6 +2,7 @@ require "../token"
 
 module AST
   class Program < Node
+    property orig : String?
     property statements : Array(Statement)
 
     def initialize(@statements)

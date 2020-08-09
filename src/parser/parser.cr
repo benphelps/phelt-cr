@@ -63,6 +63,7 @@ module Parser
 
     def parse_program
       program = AST::Program.new([] of AST::Statement)
+      program.orig = @lexer.input
       while @cur_token.type != Token::EOF.type
         statement = parse_statement()
         # debug!(statement)

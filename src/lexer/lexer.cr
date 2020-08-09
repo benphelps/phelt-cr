@@ -2,17 +2,18 @@ require "../token"
 
 module Lexer
   class Lexer
+    getter input
     @position : Int32
     @read_position : Int32
     @char : Char
-    @line : Int32
-    @column : Int32
+    @line : Int32 = 1
+    @column : Int32 = 0
+    @token_line : Int32 = 1
+    @token_column : Int32 = 0
 
     def initialize(@input : String)
       @position = 0
       @read_position = 0
-      @line = 1
-      @column = 1
       @char = Char::ZERO
       read_char()
     end
@@ -24,10 +25,10 @@ module Lexer
         @char = @input[@read_position]
       end
 
-      if @char == "\n"
+      if @char == '\n'
         @line += 1
         @column = 1
-      else
+      elsif @char != Char::ZERO
         @column += 1
       end
 
@@ -47,6 +48,9 @@ module Lexer
       token : Token::Token
 
       skip_whitespace()
+
+      @token_line = @line
+      @token_column = @column
 
       case @char
       when '=' # Operators
@@ -110,7 +114,10 @@ module Lexer
         token = new_token(Token::ILLEGAL, @char)
       end
 
-      read_char
+      if token.type != Token::EOF.type
+        read_char()
+      end
+
       token
     end
 
@@ -139,7 +146,7 @@ module Lexer
     end
 
     def new_token(token : Token::Token, literal : String | Char)
-      Token::Token.new(token.type, literal.to_s, @line, @column)
+      Token::Token.new(token.type, literal.to_s, @token_line, @token_column)
     end
   end
 
