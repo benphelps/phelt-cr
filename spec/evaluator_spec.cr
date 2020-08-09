@@ -136,7 +136,7 @@ describe "Evaluator" do
     end
   end
 
-  it "should evaluate let statements", focus: true do
+  it "should evaluate let statements" do
     tests = [
       {input: "let foo = 5 + 5;", expected: 10},
     ]
