@@ -125,6 +125,7 @@ describe "Evaluator" do
       {:input => "if (5 > 1) {\n  return true + 5;\n}", :expected => "Expected boolean, got number"},
       {:input => "if (10 > 5) {\n  return -true;\n}", :expected => "Unkown operator -boolean"},
       {:input => "if (10 > 5) {\n  return true + false;\n}", :expected => "Unkown operator boolean + boolean"},
+      {:input => "foobar;", :expected => "Undefined variable foobar"},
     ]
 
     tests.each do |test|
@@ -132,6 +133,17 @@ describe "Evaluator" do
       evaluated.should be_a(PheltObject::Error)
       error = evaluated.as(PheltObject::Error)
       error.message.should eq(test[:expected])
+    end
+  end
+
+  it "should evaluate let statements", focus: true do
+    tests = [
+      {input: "let foo = 5 + 5;", expected: 10},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
     end
   end
 end

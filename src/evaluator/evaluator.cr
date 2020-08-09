@@ -1,11 +1,12 @@
 require "debug"
 
 require "../ast"
-require "../object"
+require "../object/*"
 
 module Evaluator
   class Evaluator
     property program : AST::Program
+    property env : PheltObject::Environment
 
     @current_token : Token::Token = Token::EMPTY
     @current_block : Array(AST::Statement)
@@ -14,7 +15,7 @@ module Evaluator
     TRUE  = PheltObject::Boolean.new(true)
     FALSE = PheltObject::Boolean.new(false)
 
-    def initialize(@program)
+    def initialize(@program, @env = PheltObject::Environment.new)
       @current_block = @program.statements
     end
 
@@ -62,7 +63,12 @@ module Evaluator
       when AST::LetStatement
         value = eval(node.value)
         return value if error?(value)
+        @env.set(node.name.value, value)
         return PheltObject::Return.new(value)
+      when AST::Identifier
+        value = @env.get(node.value)
+        error("Identifier not found: #{node.value}") if error?(value)
+        return value
       else
         return NULL
       end

@@ -2,6 +2,7 @@ require "colorize"
 require "../lexer"
 require "../parser"
 require "../evaluator"
+require "../object"
 
 module REPL
   PROMPT = ">> "
@@ -9,6 +10,7 @@ module REPL
   class REPL
     def self.start
       puts "phelt v0.0.1"
+      env = PheltObject::Environment.new
 
       while true
         print ::REPL::PROMPT
@@ -23,7 +25,7 @@ module REPL
           print ::REPL::PROMPT.colorize(:red)
           puts parser.errors.join(", ")
         else
-          evaluator = Evaluator::Evaluator.new(program).eval
+          evaluator = Evaluator::Evaluator.new(program, env).eval
           puts evaluator.inspect
         end
       end
