@@ -67,7 +67,7 @@ module Evaluator
         return PheltObject::Return.new(value)
       when AST::Identifier
         value = @env.get(node.value)
-        return error("Undefined variable #{node.value}") if error?(value)
+        return error("Undefined identifier #{node.value}") if error?(value)
         return value
       else
         return NULL

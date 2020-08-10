@@ -125,7 +125,7 @@ describe "Evaluator" do
       {:input => "if (5 > 1) {\n  return true + 5;\n}", :expected => "Expected boolean, got number"},
       {:input => "if (10 > 5) {\n  return -true;\n}", :expected => "Unkown operator -boolean"},
       {:input => "if (10 > 5) {\n  return true + false;\n}", :expected => "Unkown operator boolean + boolean"},
-      {:input => "foobar;", :expected => "Undefined variable foobar"},
+      {:input => "foobar;", :expected => "Undefined identifier foobar"},
     ]
 
     tests.each do |test|
