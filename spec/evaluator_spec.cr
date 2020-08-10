@@ -211,8 +211,8 @@ describe "Evaluator" do
       {input: "len(\"\")", expected: 0},
       {input: "len(\"four\")", expected: 4},
       {input: "len(\"hello world\")", expected: 11},
-      {input: "len(1)", expected: "error"},
-      {input: "len(\"one\", \"two\");", expected: "error"},
+      {input: "len(1)", expected: "Argument to len not supported, got number"},
+      {input: "len(\"one\", \"two\");", expected: "Wrong number of arguments, got 2, expected 1"},
     ]
 
     tests.each do |test|
