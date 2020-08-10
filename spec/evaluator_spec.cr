@@ -40,6 +40,11 @@ private def test_object(object : PheltObject::String, expected)
   object.value.should eq(expected)
 end
 
+private def test_object(object : PheltObject::Error, expected)
+  object.should be_a(PheltObject::Error)
+  object.message.should eq(expected)
+end
+
 private def test_object(object : PheltObject::Null)
   object.should be_a(PheltObject::Null)
 end
@@ -193,6 +198,21 @@ describe "Evaluator" do
       {input: "let add = fn(a, b) { a + b }; add(5, 5);", expected: 10},
       {input: "let add = fn(a, b) { a + b }; add(5 + 5, add(5, 5));", expected: 20},
       {input: "fn(a, b) { return a + b }(5, 5);", expected: 10},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate builtin function calls" do
+    tests = [
+      {input: "len(\"\")", expected: 0},
+      {input: "len(\"four\")", expected: 4},
+      {input: "len(\"hello world\")", expected: 11},
+      {input: "len(1)", expected: "error"},
+      {input: "len(\"one\", \"two\");", expected: "error"},
     ]
 
     tests.each do |test|

@@ -9,7 +9,7 @@ module PheltObject
   end
 
   alias Number = Integer | Float
-  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String
+  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin
 
   class Integer
     property value : Int64
@@ -128,6 +128,23 @@ module PheltObject
 
     def inspect
       "fn(#{@parameters.join(", ", &.string)})#{@body.string}"
+    end
+  end
+
+  alias BuiltinFunction = (Array(PheltObject::Object)) -> Object
+
+  class Builtin
+    property function : BuiltinFunction
+
+    def initialize(@function)
+    end
+
+    def type
+      "builtin"
+    end
+
+    def inspect
+      "builtin function"
     end
   end
 end

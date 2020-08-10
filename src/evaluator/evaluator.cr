@@ -2,6 +2,7 @@ require "debug"
 
 require "../ast"
 require "../object/*"
+require "./builtins"
 
 module Evaluator
   class Evaluator
@@ -67,9 +68,7 @@ module Evaluator
         return value if error?(value)
         env.set(node.name.value, value)
       when AST::Identifier
-        value = env.get(node.value)
-        return error("Undefined identifier #{node.value}") if error?(value)
-        return value
+        return eval_identifier(node, env)
       when AST::FunctionLiteral
         params = node.parameters
         body = node.body
@@ -79,8 +78,8 @@ module Evaluator
         return function if error?(function)
         args = eval_expressions(node.arguments, env)
         return args[0] if args.size == 1 && error?(args[0])
-        return error("Object is not a function") if !function.is_a? PheltObject::Function
-        return apply_function(function.as(PheltObject::Function), args)
+        return error("Object is not a function") if !function.is_a? PheltObject::Function | PheltObject::Builtin
+        return apply_function(function.as(PheltObject::Function | PheltObject::Builtin), args)
       else
         return NULL
       end
@@ -107,10 +106,21 @@ module Evaluator
       end
     end
 
-    def apply_function(function : PheltObject::Function, args : Array(PheltObject::Object))
-      extended_env = extend_function_env(function, args)
-      evaluated = eval(function.body, extended_env)
-      return unwrap_return_value(evaluated)
+    def apply_function(function : PheltObject::Function | PheltObject::Builtin, args : Array(PheltObject::Object))
+      case function
+      when PheltObject::Function
+        extended_env = extend_function_env(function, args)
+        evaluated = eval(function.body, extended_env)
+        return unwrap_return_value(evaluated)
+      when PheltObject::Builtin
+        value = function.function.call(args)
+        if value.is_a? PheltObject::Error
+          return error("#{value.message}")
+        end
+        return value
+      else
+        return error("#{function.type} is not a function")
+      end
     end
 
     def extend_function_env(function : PheltObject::Function, args : Array(PheltObject::Object))
@@ -128,6 +138,17 @@ module Evaluator
         return object.value
       end
       return object
+    end
+
+    def eval_identifier(node : AST::Identifier, env : PheltObject::Environment)
+      if env.exists?(node.value)
+        return env.get(node.value)
+      else
+        if ::Evaluator::BUILTINS.has_key? node.value
+          return ::Evaluator::BUILTINS[node.value]
+        end
+      end
+      return error("Undefined identifier #{node.value}")
     end
 
     def eval_expressions(expressions : Array(AST::Expression), env : PheltObject::Environment)

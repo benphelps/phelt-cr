@@ -16,6 +16,15 @@ module PheltObject
       return PheltObject::Error.new("error", "error", 0, 0)
     end
 
+    def exists?(name : ::String) : Bool
+      return true if @store.has_key? name
+      outer = @outer
+      unless outer.nil?
+        return true if outer.has_key? name
+      end
+      return false
+    end
+
     def set(name : ::String, value : PheltObject::Object)
       @store[name] = value
       return value
