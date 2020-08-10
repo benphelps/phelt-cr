@@ -20,16 +20,16 @@ module Evaluator
     end
 
     def eval
-      eval(@program)
+      eval(@program, @env)
     end
 
-    def eval(node : AST::Node) : PheltObject::Object
+    def eval(node : AST::Node, env : PheltObject::Environment) : PheltObject::Object
       case node
       when AST::Program
-        return eval_program(node.statements)
+        return eval_program(node.statements, env)
       when AST::ExpressionStatement
         @current_token = node.token
-        return eval(node.expression)
+        return eval(node.expression, env)
       when AST::IntegerLiteral
         return PheltObject::Integer.new(node.value)
       when AST::FloatLiteral
@@ -39,36 +39,46 @@ module Evaluator
         return bool_to_boolean(node.value)
       when AST::PrefixExpression
         @current_token = node.right.token
-        right = eval(node.right)
+        right = eval(node.right, env)
         return right if error?(right)
         return eval_prefix_expression(node.operator, right)
       when AST::InfixExpression
         @current_token = node.left.token
-        left = eval(node.left)
+        left = eval(node.left, env)
         return left if error?(left)
         @current_token = node.right.token
-        right = eval(node.right)
+        right = eval(node.right, env)
         return right if error?(right)
         return eval_infix_expression(node.operator, left, right)
       when AST::BlockStatement
-        return eval_block_statement(node)
+        return eval_block_statement(node, env)
       when AST::IfExpression
         @current_token = node.condition.token
-        return eval_if_expression(node)
+        return eval_if_expression(node, env)
       when AST::ReturnStatement
         @current_token = node.token
-        value = eval(node.return_value)
+        value = eval(node.return_value, env)
         return value if error?(value)
         return PheltObject::Return.new(value)
       when AST::LetStatement
-        value = eval(node.value)
+        value = eval(node.value, env)
         return value if error?(value)
-        @env.set(node.name.value, value)
-        return PheltObject::Return.new(value)
+        env.set(node.name.value, value)
       when AST::Identifier
-        value = @env.get(node.value)
+        value = env.get(node.value)
         return error("Undefined identifier #{node.value}") if error?(value)
         return value
+      when AST::FunctionLiteral
+        params = node.parameters
+        body = node.body
+        return PheltObject::Function.new(params, body, env)
+      when AST::CallExpression
+        function = eval(node.function, env)
+        return function if error?(function)
+        args = eval_expressions(node.arguments, env)
+        return args[0] if args.size == 1 && error?(args[0])
+        return error("Object is not a function") if !function.is_a? PheltObject::Function
+        return apply_function(function.as(PheltObject::Function), args)
       else
         return NULL
       end
@@ -95,26 +105,61 @@ module Evaluator
       end
     end
 
-    def eval_if_expression(expression : AST::IfExpression)
-      condition = eval(expression.condition)
+    def apply_function(function : PheltObject::Function, args : Array(PheltObject::Object))
+      extended_env = extend_function_env(function, args)
+      evaluated = eval(function.body, extended_env)
+      return unwrap_return_value(evaluated)
+    end
+
+    def extend_function_env(function : PheltObject::Function, args : Array(PheltObject::Object))
+      extended_env = PheltObject::Environment.new(function.env.store)
+
+      function.parameters.each_with_index do |param, index|
+        extended_env.set(param.value, args[index])
+      end
+
+      return extended_env
+    end
+
+    def unwrap_return_value(object : PheltObject::Object)
+      if object.is_a? PheltObject::Return
+        return object.value
+      end
+      return object
+    end
+
+    def eval_expressions(expressions : Array(AST::Expression), env : PheltObject::Environment)
+      result = [] of PheltObject::Object
+
+      expressions.each do |expression|
+        evaluated = eval(expression, env)
+        return [evaluated] if error?(evaluated)
+        result << evaluated
+      end
+
+      return result
+    end
+
+    def eval_if_expression(expression : AST::IfExpression, env : PheltObject::Environment)
+      condition = eval(expression.condition, env)
       return condition if error?(condition)
       if truthy?(condition)
-        return eval(expression.consequence)
-      elsif expression.alternative
-        return eval(expression.alternative)
+        return eval(expression.consequence, env)
+      elsif expression.alternative.is_a? AST::BlockStatement
+        return eval(expression.alternative.as(AST::BlockStatement), env)
       else
         return NULL
       end
     end
 
-    def eval_program(statements : Array(AST::Statement))
+    def eval_program(statements : Array(AST::Statement), env : PheltObject::Environment)
       result = NULL
 
       @current_block = statements
 
       statements.each do |statement|
         @current_token = statement.token
-        result = eval(statement)
+        result = eval(statement, env)
         if result.is_a? PheltObject::Return
           return result.value
         elsif result.is_a? PheltObject::Error
@@ -125,14 +170,14 @@ module Evaluator
       result
     end
 
-    def eval_block_statement(block : AST::BlockStatement)
+    def eval_block_statement(block : AST::BlockStatement, env : PheltObject::Environment)
       result = NULL
 
       @current_block = block.statements
 
       block.statements.each do |statement|
         @current_token = statement.token
-        result = eval(statement)
+        result = eval(statement, env)
 
         if result.is_a? PheltObject::Return | PheltObject::Error
           return result

@@ -146,4 +146,31 @@ describe "Evaluator" do
       test_object(evaluated, test[:expected])
     end
   end
+
+  it "should evaluate function objects" do
+    tests = [
+      {input: "fn(x) { x + 2 }", expected: 10},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      function = evaluated.as(PheltObject::Function)
+      function.parameters.size.should eq(1)
+      function.parameters[0].string.should eq("x")
+      function.body.string.should eq("{ (x + 2) }")
+    end
+  end
+
+  it "should evaluate function calls" do
+    tests = [
+      {input: "let add = fn(a, b) { a + b }; add(5, 5);", expected: 10},
+      {input: "let add = fn(a, b) { a + b }; add(5 + 5, add(5, 5));", expected: 20},
+      {input: "fn(a, b) { return a + b }(5, 5);", expected: 10},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
 end

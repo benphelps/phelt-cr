@@ -1,3 +1,5 @@
+require "../ast"
+
 module PheltObject
   struct Type
     property value : String
@@ -7,7 +9,7 @@ module PheltObject
   end
 
   alias Number = Integer | Float
-  alias Object = Integer | Float | Boolean | Error | Null | Return
+  alias Object = Integer | Float | Boolean | Error | Null | Return | Function
 
   class Integer
     property value : Int64
@@ -94,6 +96,23 @@ module PheltObject
 
     def inspect
       @pretty
+    end
+  end
+
+  class Function
+    property parameters : Array(AST::Identifier)
+    property body : AST::BlockStatement
+    property env : Environment
+
+    def initialize(@parameters, @body, @env)
+    end
+
+    def type
+      "function"
+    end
+
+    def inspect
+      "fn(#{@parameters.join(", ", &.string)})#{@body.string}"
     end
   end
 end
