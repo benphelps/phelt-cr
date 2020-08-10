@@ -95,6 +95,9 @@ module Lexer
         token = new_token(Token::LBRACE, @char)
       when '}'
         token = new_token(Token::RBRACE, @char)
+      when '"'
+        literal = read_string()
+        token = new_token(Token::STRING, literal)
       when Char::ZERO
         token = new_token(Token::EOF, Char::ZERO)
       else # Identifiers
@@ -135,6 +138,17 @@ module Lexer
       while ::Lexer.is_number?(@char) || (have_decimal == false && @char == '.')
         have_decimal = true if @char == '.'
         read_char()
+      end
+      @input[position..@position - 1]
+    end
+
+    def read_string
+      position = @position + 1
+      loop do
+        read_char()
+        if @char == '"' || @char == Char::ZERO
+          break
+        end
       end
       @input[position..@position - 1]
     end

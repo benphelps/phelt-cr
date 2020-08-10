@@ -35,6 +35,11 @@ private def test_object(object : PheltObject::Boolean, expected)
   object.value.should eq(expected)
 end
 
+private def test_object(object : PheltObject::String, expected)
+  object.should be_a(PheltObject::String)
+  object.value.should eq(expected)
+end
+
 private def test_object(object : PheltObject::Null)
   object.should be_a(PheltObject::Null)
 end
@@ -139,6 +144,28 @@ describe "Evaluator" do
   it "should evaluate let statements" do
     tests = [
       {input: "let foo = 5 + 5;", expected: 10},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate string literals" do
+    tests = [
+      {input: "\"foo bar\"", expected: "foo bar"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate string concatenation" do
+    tests = [
+      {input: "\"foo\" + \"bar\"", expected: "foobar"},
     ]
 
     tests.each do |test|

@@ -43,6 +43,11 @@ def test_literal(literal : AST::FloatLiteral, value : Float64)
   literal.token_literal.should eq("#{value}")
 end
 
+def test_literal(literal : AST::StringLiteral, value : String)
+  literal.value.should eq(value)
+  literal.token_literal.should eq("#{value}")
+end
+
 def test_literal(literal : AST::BooleanLiteral, value : Bool)
   literal.value.should eq(value)
   literal.token_literal.should eq("#{value}")

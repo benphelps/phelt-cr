@@ -29,9 +29,10 @@ module Token
   EOF     = Token.new("EOF", Char::ZERO.to_s)
 
   # Identifiers and literals
-  IDENT = Token.new("IDENT", "IDENT")
-  INT   = Token.new("INT", "INT")
-  FLOAT = Token.new("FLOAT", "FLOAT")
+  IDENT  = Token.new("IDENT", "ident")
+  INT    = Token.new("INT", "int")
+  FLOAT  = Token.new("FLOAT", "float")
+  STRING = Token.new("STRING", "string")
 
   # Operators
   ASSIGN   = Token.new("ASSIGN", "=")

@@ -2,14 +2,14 @@ require "../ast"
 
 module PheltObject
   struct Type
-    property value : String
+    property value : ::String
 
     def initialize(@value)
     end
   end
 
   alias Number = Integer | Float
-  alias Object = Integer | Float | Boolean | Error | Null | Return | Function
+  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String
 
   class Integer
     property value : Int64
@@ -56,6 +56,21 @@ module PheltObject
     end
   end
 
+  class String
+    property value : ::String
+
+    def initialize(@value)
+    end
+
+    def type
+      "string"
+    end
+
+    def inspect
+      @value.to_s
+    end
+  end
+
   class Null
     def type
       "null"
@@ -82,8 +97,8 @@ module PheltObject
   end
 
   class Error
-    property message : String
-    property pretty : String
+    property message : ::String
+    property pretty : ::String
     property line : Int32
     property column : Int32
 

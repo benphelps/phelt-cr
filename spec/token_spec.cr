@@ -49,4 +49,6 @@ describe Lexer::Lexer do
   it_lexes "+", Token::PLUS
   it_lexes "*", Token::ASTERISK
   it_lexes "/", Token::SLASH
+  it_lexes "\"foobar\"", Token::STRING, "foobar"
+  it_lexes "\"foo bar\"", Token::STRING, "foo bar"
 end

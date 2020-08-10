@@ -118,6 +118,23 @@ describe "Parser" do
     test_literal(literal, true)
   end
 
+  it "should parse string literals" do
+    input = "\"foobar\";"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.statements.size.should eq(1)
+
+    statement = program.statements[0].as(AST::ExpressionStatement)
+    literal = statement.expression.as(AST::StringLiteral)
+
+    statement.should be_a(AST::ExpressionStatement)
+    test_literal(literal, "foobar")
+  end
+
   it "should parse prefix expressions" do
     tests = [
       {:input => "!5;", :operator => "!", :value => 5_i64},

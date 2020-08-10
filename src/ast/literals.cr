@@ -49,6 +49,22 @@ module AST
     end
   end
 
+  class StringLiteral < Expression
+    property token : Token::Token
+    property value : String
+
+    def initialize(@token, @value)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      @token.literal
+    end
+  end
+
   class FunctionLiteral < Expression
     property token : Token::Token
     property parameters : Array(Identifier)
