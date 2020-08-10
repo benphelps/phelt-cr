@@ -2,7 +2,8 @@ require "../object/*"
 
 module Evaluator
   BUILTINS = {
-    "len" => PheltObject::Builtin.new(
+    "__VERSION__" => PheltObject::String.new("Phelt v0.0.1"),
+    "len"         => PheltObject::Builtin.new(
       function = PheltObject::BuiltinFunction.new do |args|
         if args.size != 1
           return PheltObject::Error.new("Wrong number of arguments, got #{args.size}, expected 1", "", 0, 0)
