@@ -347,6 +347,31 @@ describe "Parser" do
     test_literal(infix.right, "y")
   end
 
+  it "should parse do expressions" do
+    input = "do { x + y; }"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    statement = program.statements[0].as(AST::ExpressionStatement)
+
+    do_obj = statement.expression.as(AST::DoLiteral)
+
+    do_obj.body.statements.size.should eq(1)
+    body_stmt = do_obj.body.statements[0].as(AST::ExpressionStatement)
+
+    infix = body_stmt.expression.as(AST::InfixExpression)
+
+    test_literal(infix.left, "x")
+    infix.operator.should eq("+")
+    test_literal(infix.right, "y")
+  end
+
   it "should parse function expressions" do
     input = "fn(x, y) { x + y; }"
 

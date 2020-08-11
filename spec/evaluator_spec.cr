@@ -193,6 +193,17 @@ describe "Evaluator" do
     end
   end
 
+  it "should evaluate do objects" do
+    tests = [
+      {input: "let foo = 5; do { let foo = 10; } foo", expected: 5},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
   it "should evaluate function calls" do
     tests = [
       {input: "let add = fn(a, b) { a + b }; add(5, 5);", expected: 10},

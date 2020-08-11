@@ -53,4 +53,5 @@ describe Lexer::Lexer do
   it_lexes "/", Token::SLASH
   it_lexes "\"foobar\"", Token::STRING, "foobar"
   it_lexes "\"foo bar\"", Token::STRING, "foo bar"
+  it_lexes "do", Token::DO
 end
