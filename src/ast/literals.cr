@@ -82,6 +82,22 @@ module AST
     end
   end
 
+  class DoLiteral < Expression
+    property token : Token::Token
+    property body : BlockStatement
+
+    def initialize(@token, @body)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "#{token_literal}#{@body.string}"
+    end
+  end
+
   class ArrayLiteral < Expression
     property token : Token::Token
     property elements : Array(Expression)

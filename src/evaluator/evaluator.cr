@@ -73,6 +73,9 @@ module Evaluator
         params = node.parameters
         body = node.body
         return PheltObject::Function.new(params, body, env)
+      when AST::DoLiteral
+        body = node.body
+        return apply_do(body, env)
       when AST::CallExpression
         function = eval(node.function, env)
         return function if error?(function)
@@ -131,6 +134,12 @@ module Evaluator
       else
         return error("#{function.type} is not a function")
       end
+    end
+
+    def apply_do(body : AST::BlockStatement, env : PheltObject::Environment)
+      extended_env = PheltObject::Environment.new(env.store)
+      evaluated = eval(body, extended_env)
+      return unwrap_return_value(evaluated)
     end
 
     def extend_function_env(function : PheltObject::Function, args : Array(PheltObject::Object))

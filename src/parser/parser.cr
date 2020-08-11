@@ -52,6 +52,7 @@ module Parser
       register_parser_grouped_expression
       register_parser_if_expression
       register_parser_function_literal
+      register_parser_do_literal
       register_parser_array_literal
       register_parser_array_index
 
@@ -323,6 +324,21 @@ module Parser
       end
 
       @prefix_parsers[Token::FUNCTION.type] = parser
+    end
+
+    def register_parser_do_literal
+      parser = PrefixParser.new do
+        token = @cur_token
+        if !expect_peek(Token::LBRACE)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        body = parse_block_statement
+
+        AST::DoLiteral.new(token, body)
+      end
+
+      @prefix_parsers[Token::DO.type] = parser
     end
 
     def register_parser_call_expression

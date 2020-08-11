@@ -163,6 +163,23 @@ module PheltObject
     end
   end
 
+  class Do
+    TYPE = "do"
+
+    property body : AST::BlockStatement
+
+    def initialize(@body)
+    end
+
+    def type
+      TYPE
+    end
+
+    def inspect
+      "do #{@body.string}"
+    end
+  end
+
   alias BuiltinFunction = (::Array(PheltObject::Object), PheltObject::Environment) -> Object
 
   class Builtin

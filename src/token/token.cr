@@ -16,6 +16,7 @@ module Token
     "if"     => IF,
     "else"   => ELSE,
     "return" => RETURN,
+    "do"     => DO,
   } of String => Token
 
   def self.lookup_ident(ident : String)
@@ -60,6 +61,7 @@ module Token
 
   # Keywords
   FUNCTION = Token.new("FUNCTION", "fn")
+  DO       = Token.new("DO", "do")
   LET      = Token.new("LET", "let")
   TRUE     = Token.new("TRUE", "true")
   FALSE    = Token.new("FALSE", "false")
