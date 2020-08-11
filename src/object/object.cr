@@ -163,7 +163,7 @@ module PheltObject
     end
   end
 
-  alias BuiltinFunction = (::Array(PheltObject::Object)) -> Object
+  alias BuiltinFunction = (::Array(PheltObject::Object), PheltObject::Environment) -> Object
 
   class Builtin
     TYPE = "builtin"

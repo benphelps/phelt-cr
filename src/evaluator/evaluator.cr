@@ -79,7 +79,7 @@ module Evaluator
         args = eval_expressions(node.arguments, env)
         return args[0] if args.size == 1 && error?(args[0])
         return error("Object is not a function") if !function.is_a? PheltObject::Function | PheltObject::Builtin
-        return apply_function(function.as(PheltObject::Function | PheltObject::Builtin), args)
+        return apply_function(function.as(PheltObject::Function | PheltObject::Builtin), args, env)
       when AST::ArrayLiteral
         elements = eval_expressions(node.elements, env)
         return elements[0] if elements.size == 1 && error?(elements[0])
@@ -116,14 +116,14 @@ module Evaluator
       end
     end
 
-    def apply_function(function : PheltObject::Function | PheltObject::Builtin, args : Array(PheltObject::Object))
+    def apply_function(function : PheltObject::Function | PheltObject::Builtin, args : Array(PheltObject::Object), env : PheltObject::Environment)
       case function
       when PheltObject::Function
         extended_env = extend_function_env(function, args)
         evaluated = eval(function.body, extended_env)
         return unwrap_return_value(evaluated)
       when PheltObject::Builtin
-        value = function.function.call(args)
+        value = function.function.call(args, env)
         if value.is_a? PheltObject::Error
           return error("#{value.message}")
         end
