@@ -1,7 +1,7 @@
 module PheltObject
   class Environment
     property store : Hash(::String, PheltObject::Object)
-    property outer : Hash(::String, PheltObject::Object)?
+    property outer : PheltObject::Environment?
 
     def initialize(@outer = nil)
       @store = {} of ::String => PheltObject::Object
@@ -11,7 +11,7 @@ module PheltObject
       return @store[name] if @store.has_key? name
       outer = @outer
       unless outer.nil?
-        return outer[name] if outer.has_key? name
+        return outer.store[name] if outer.store.has_key? name
       end
       return PheltObject::Error.new("error", "error", 0, 0)
     end
@@ -20,7 +20,7 @@ module PheltObject
       return true if @store.has_key? name
       outer = @outer
       unless outer.nil?
-        return true if outer.has_key? name
+        return true if outer.store.has_key? name
       end
       return false
     end

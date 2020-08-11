@@ -137,13 +137,13 @@ module Evaluator
     end
 
     def apply_do(body : AST::BlockStatement, env : PheltObject::Environment)
-      extended_env = PheltObject::Environment.new(env.store)
+      extended_env = PheltObject::Environment.new(env)
       evaluated = eval(body, extended_env)
       return unwrap_return_value(evaluated)
     end
 
     def extend_function_env(function : PheltObject::Function, args : Array(PheltObject::Object))
-      extended_env = PheltObject::Environment.new(function.env.store)
+      extended_env = PheltObject::Environment.new(function.env)
 
       function.parameters.each_with_index do |param, index|
         extended_env.set(param.value, args[index])
