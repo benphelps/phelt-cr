@@ -211,6 +211,10 @@ describe "Evaluator" do
       {input: "len(\"\")", expected: 0},
       {input: "len(\"four\")", expected: 4},
       {input: "len(\"hello world\")", expected: 11},
+      {input: "len([])", expected: 0},
+      {input: "len([1,2,3,4,5])", expected: 5},
+      {input: "first([])", expected: nil},
+      {input: "first([1,2,3,4,5])", expected: 1},
       {input: "len(1)", expected: "Argument to len not supported, got number"},
       {input: "len(\"one\", \"two\");", expected: "Wrong number of arguments, got 2, expected 1"},
     ]
