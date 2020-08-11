@@ -12,13 +12,15 @@ module PheltObject
   alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin | Array
 
   class Integer
+    TYPE = "number"
+
     property value : Int64
 
     def initialize(@value)
     end
 
     def type
-      "number"
+      TYPE
     end
 
     def inspect
@@ -27,13 +29,14 @@ module PheltObject
   end
 
   class Float
+    TYPE = "float"
     property value : Float64
 
     def initialize(@value)
     end
 
     def type
-      "number"
+      TYPE
     end
 
     def inspect
@@ -42,13 +45,15 @@ module PheltObject
   end
 
   class Boolean
+    TYPE = "boolean"
+
     property value : Bool
 
     def initialize(@value)
     end
 
     def type
-      "boolean"
+      TYPE
     end
 
     def inspect
@@ -57,13 +62,15 @@ module PheltObject
   end
 
   class String
+    TYPE = "string"
+
     property value : ::String
 
     def initialize(@value)
     end
 
     def type
-      "string"
+      TYPE
     end
 
     def inspect
@@ -72,13 +79,15 @@ module PheltObject
   end
 
   class Array
+    TYPE = "array"
+
     property elements : ::Array(Object)
 
     def initialize(@elements)
     end
 
     def type
-      "array"
+      TYPE
     end
 
     def inspect
@@ -87,8 +96,10 @@ module PheltObject
   end
 
   class Null
+    TYPE = "null"
+
     def type
-      "null"
+      TYPE
     end
 
     def inspect
@@ -97,13 +108,15 @@ module PheltObject
   end
 
   class Return
+    TYPE = "return"
+
     property value : Object
 
     def initialize(@value)
     end
 
     def type
-      "return"
+      TYPE
     end
 
     def inspect
@@ -112,6 +125,8 @@ module PheltObject
   end
 
   class Error
+    TYPE = "error"
+
     property message : ::String
     property pretty : ::String
     property line : Int32
@@ -121,7 +136,7 @@ module PheltObject
     end
 
     def type
-      "error"
+      TYPE
     end
 
     def inspect
@@ -130,6 +145,8 @@ module PheltObject
   end
 
   class Function
+    TYPE = "function"
+
     property parameters : ::Array(AST::Identifier)
     property body : AST::BlockStatement
     property env : Environment
@@ -138,7 +155,7 @@ module PheltObject
     end
 
     def type
-      "function"
+      TYPE
     end
 
     def inspect
@@ -149,13 +166,15 @@ module PheltObject
   alias BuiltinFunction = (::Array(PheltObject::Object)) -> Object
 
   class Builtin
+    TYPE = "builtin"
+
     property function : BuiltinFunction
 
     def initialize(@function)
     end
 
     def type
-      "builtin"
+      TYPE
     end
 
     def inspect
