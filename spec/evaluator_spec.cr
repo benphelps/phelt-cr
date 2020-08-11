@@ -157,6 +157,18 @@ describe "Evaluator" do
     end
   end
 
+  it "should evaluate const statements" do
+    tests = [
+      {input: "const foo = 5 + 5;", expected: 10},
+      {input: "const foo = 5; const foo = 5;", expected: "Cannot redefine constant foo"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
   it "should evaluate string literals" do
     tests = [
       {input: "\"foo bar\"", expected: "foo bar"},

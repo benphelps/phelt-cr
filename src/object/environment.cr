@@ -1,5 +1,6 @@
 module PheltObject
   class Environment
+    property constants : ::Array(::String) = [] of ::String
     property store : Hash(::String, PheltObject::Object)
     property outer : PheltObject::Environment?
 
@@ -25,7 +26,17 @@ module PheltObject
       return false
     end
 
-    def set(name : ::String, value : PheltObject::Object)
+    def constant?(name : ::String) : Bool
+      return true if @constants.includes? name
+      outer = @outer
+      unless outer.nil?
+        return true if outer.constants.includes? name
+      end
+      return false
+    end
+
+    def set(name : ::String, value : PheltObject::Object, const = false)
+      @constants << name if const
       @store[name] = value
       return value
     end

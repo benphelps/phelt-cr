@@ -11,6 +11,7 @@ module Token
   KEYWORDS = {
     "fn"     => FUNCTION,
     "let"    => LET,
+    "const"  => CONST,
     "true"   => TRUE,
     "false"  => FALSE,
     "if"     => IF,
@@ -63,6 +64,7 @@ module Token
   FUNCTION = Token.new("FUNCTION", "fn")
   DO       = Token.new("DO", "do")
   LET      = Token.new("LET", "let")
+  CONST    = Token.new("CONST", "const")
   TRUE     = Token.new("TRUE", "true")
   FALSE    = Token.new("FALSE", "false")
   IF       = Token.new("IF", "if")

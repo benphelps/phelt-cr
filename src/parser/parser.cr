@@ -85,6 +85,8 @@ module Parser
       case @cur_token.type
       when Token::LET.type
         return parse_let_statement()
+      when Token::CONST.type
+        return parse_const_statement()
       when Token::RETURN.type
         return parse_return_statement()
       else
@@ -446,6 +448,29 @@ module Parser
       end
 
       return AST::LetStatement.new(token, name, value)
+    end
+
+    def parse_const_statement
+      token = @cur_token
+
+      return nil if !expect_peek(Token::IDENT)
+
+      name = AST::Identifier.new(
+        token = @cur_token,
+        value = @cur_token.literal
+      )
+
+      return nil if !expect_peek(Token::ASSIGN)
+
+      next_token
+
+      value = parse_expression(Precedences::Lowest)
+
+      if peek_token_is?(Token::SEMICOLON)
+        next_token
+      end
+
+      return AST::ConstStatement.new(token, name, value)
     end
 
     def parse_return_statement

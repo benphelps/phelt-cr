@@ -66,7 +66,13 @@ module Evaluator
       when AST::LetStatement
         value = eval(node.value, env)
         return value if error?(value)
+        return error("Cannot redefine constant #{node.name.value}") if env.constant?(node.name.value)
         env.set(node.name.value, value)
+      when AST::ConstStatement
+        value = eval(node.value, env)
+        return value if error?(value)
+        return error("Cannot redefine constant #{node.name.value}") if env.constant?(node.name.value)
+        env.set(node.name.value, value, true)
       when AST::Identifier
         return eval_identifier(node, env)
       when AST::FunctionLiteral

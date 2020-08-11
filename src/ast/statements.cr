@@ -18,6 +18,23 @@ module AST
     end
   end
 
+  class ConstStatement < Statement
+    property token : Token::Token
+    property name : Identifier
+    property value : Expression
+
+    def initialize(@token, @name, @value)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "#{token_literal} #{@name.string} = #{@value.string};"
+    end
+  end
+
   class ReturnStatement < Statement
     property token : Token::Token
     property return_value : Expression

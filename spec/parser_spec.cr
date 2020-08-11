@@ -23,6 +23,28 @@ describe "Parser" do
     end
   end
 
+  it "should parse let statements" do
+    tests = [
+      {:input => "const x = 5;", :identifier => "x", :value => 5_i64},
+      {:input => "const y = true;", :identifier => "y", :value => true},
+      {:input => "const foobar = y;", :identifier => "foobar", :value => "y"},
+    ]
+
+    tests.each do |test|
+      lexer = Lexer::Lexer.new(test[:input].as(String))
+      parser = Parser::Parser.new(lexer)
+      program = parser.parse_program
+      check_parser_errors(parser)
+
+      program.should_not be_nil
+      program.statements.size.should eq(1)
+      statement = program.statements[0].as(AST::ConstStatement)
+
+      test_statement(statement, test[:identifier])
+      test_literal(statement.value, test[:value])
+    end
+  end
+
   it "should parse return statements" do
     tests = [
       {:input => "return 5;", :value => 5_i64},
