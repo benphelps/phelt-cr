@@ -81,4 +81,20 @@ module AST
       "#{token_literal}(#{@parameters.join(", ", &.string)})#{@body.string}"
     end
   end
+
+  class ArrayLiteral < Expression
+    property token : Token::Token
+    property elements : Array(Expression)
+
+    def initialize(@token, @elements)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "[#{@elements.join(", ", &.string)}]"
+    end
+  end
 end

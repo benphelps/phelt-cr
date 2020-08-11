@@ -9,7 +9,7 @@ module PheltObject
   end
 
   alias Number = Integer | Float
-  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin
+  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin | Array
 
   class Integer
     property value : Int64
@@ -71,6 +71,21 @@ module PheltObject
     end
   end
 
+  class Array
+    property elements : ::Array(Object)
+
+    def initialize(@elements)
+    end
+
+    def type
+      "array"
+    end
+
+    def inspect
+      "[#{elements.join(", ", &.inspect)}]"
+    end
+  end
+
   class Null
     def type
       "null"
@@ -115,7 +130,7 @@ module PheltObject
   end
 
   class Function
-    property parameters : Array(AST::Identifier)
+    property parameters : ::Array(AST::Identifier)
     property body : AST::BlockStatement
     property env : Environment
 
@@ -131,7 +146,7 @@ module PheltObject
     end
   end
 
-  alias BuiltinFunction = (Array(PheltObject::Object)) -> Object
+  alias BuiltinFunction = (::Array(PheltObject::Object)) -> Object
 
   class Builtin
     property function : BuiltinFunction

@@ -95,6 +95,10 @@ module Lexer
         token = new_token(Token::LBRACE, @char)
       when '}'
         token = new_token(Token::RBRACE, @char)
+      when '['
+        token = new_token(Token::LBRACKET, @char)
+      when ']'
+        token = new_token(Token::RBRACKET, @char)
       when '"'
         literal = read_string()
         token = new_token(Token::STRING, literal)

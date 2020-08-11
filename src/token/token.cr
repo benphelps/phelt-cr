@@ -55,6 +55,8 @@ module Token
   RPAREN    = Token.new("RPAREN", ")")
   LBRACE    = Token.new("LBRACE", "{")
   RBRACE    = Token.new("RBRACE", "}")
+  LBRACKET  = Token.new("LBRACKET", "[")
+  RBRACKET  = Token.new("RBRACKET", "]")
 
   # Keywords
   FUNCTION = Token.new("FUNCTION", "fn")

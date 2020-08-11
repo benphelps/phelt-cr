@@ -40,6 +40,8 @@ describe Lexer::Lexer do
   it_lexes ")", Token::RPAREN
   it_lexes "{", Token::LBRACE
   it_lexes "}", Token::RBRACE
+  it_lexes "[", Token::LBRACKET
+  it_lexes "]", Token::RBRACKET
   it_lexes "<", Token::LT
   it_lexes ">", Token::GT
   it_lexes "==", Token::EQ

@@ -45,7 +45,7 @@ private def test_object(object : PheltObject::Error, expected)
   object.message.should eq(expected)
 end
 
-private def test_object(object : PheltObject::Null)
+private def test_object(object : PheltObject::Null, expected = nil)
   object.should be_a(PheltObject::Null)
 end
 
@@ -213,6 +213,38 @@ describe "Evaluator" do
       {input: "len(\"hello world\")", expected: 11},
       {input: "len(1)", expected: "Argument to len not supported, got number"},
       {input: "len(\"one\", \"two\");", expected: "Wrong number of arguments, got 2, expected 1"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate array literals" do
+    input = "[1, 2 * 2, 3 + 3]"
+    evaluated = eval(input)
+
+    evaluated.should be_a(PheltObject::Array)
+    array = evaluated.as(PheltObject::Array)
+
+    array.elements.size.should eq(3)
+
+    test_object(array.elements[0], 1)
+    test_object(array.elements[1], 4)
+    test_object(array.elements[2], 6)
+  end
+
+  it "should evaluate array index expressions" do
+    tests = [
+      {input: "[1, 2, 3][0]", expected: 1},
+      {input: "[1, 2, 3][1]", expected: 2},
+      {input: "[1, 2, 3][2]", expected: 3},
+      {input: "let array = [1, 2, 3]; array[0];", expected: 1},
+      {input: "let array = [1, 2, 3]; array[0] + array[1] + array[2];", expected: 6},
+      {input: "let array = [1, 2, 3]; let i = array[0]; array[i];", expected: 2},
+      {input: "[1, 2, 3][4]", expected: nil},
+      {input: "[1, 2, 3][-1]", expected: nil},
     ]
 
     tests.each do |test|

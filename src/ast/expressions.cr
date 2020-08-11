@@ -118,4 +118,21 @@ module AST
       "#{function.string}(#{arguments.join(", ", &.string)})"
     end
   end
+
+  class IndexExpression < Expression
+    property token : Token::Token
+    property left : Expression
+    property index : Expression
+
+    def initialize(@token, @left, @index)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "(#{left.string}[#{index.string}])"
+    end
+  end
 end

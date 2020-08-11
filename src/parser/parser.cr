@@ -16,6 +16,7 @@ module Parser
     Product     # *
     Prefix      # -X or !X
     Call        # myFunction(X)
+    Index       # array[index]
   end
 
   class Parser
@@ -37,6 +38,7 @@ module Parser
       Token::SLASH.type    => Precedences::Product,
       Token::ASTERISK.type => Precedences::Product,
       Token::LPAREN.type   => Precedences::Call,
+      Token::LBRACKET.type => Precedences::Index,
     } of Token::Type => Precedences
 
     def initialize(@lexer : Lexer::Lexer)
@@ -50,6 +52,8 @@ module Parser
       register_parser_grouped_expression
       register_parser_if_expression
       register_parser_function_literal
+      register_parser_array_literal
+      register_parser_array_index
 
       register_parser_call_expression
 
@@ -197,6 +201,28 @@ module Parser
       @prefix_parsers[Token::STRING.type] = parser
     end
 
+    def register_parser_array_literal
+      parser = PrefixParser.new do
+        AST::ArrayLiteral.new(token = @cur_token, elements = parse_expression_list(Token::RBRACKET))
+      end
+      @prefix_parsers[Token::LBRACKET.type] = parser
+    end
+
+    def register_parser_array_index
+      parser = InfixParser.new do |left|
+        token = @cur_token
+        next_token
+        index = parse_expression(Precedences::Lowest)
+
+        if !expect_peek(Token::RBRACKET)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        AST::IndexExpression.new(token = @cur_token, left, index)
+      end
+      @infix_parsers[Token::LBRACKET.type] = parser
+    end
+
     def register_parser_infix_expression
       parser = InfixParser.new do |left|
         token = @cur_token
@@ -301,16 +327,16 @@ module Parser
 
     def register_parser_call_expression
       parser = InfixParser.new do |function|
-        AST::CallExpression.new(@cur_token, function, parse_call_arguments)
+        AST::CallExpression.new(@cur_token, function, parse_expression_list(Token::RPAREN))
       end
 
       @infix_parsers[Token::LPAREN.type] = parser
     end
 
-    def parse_call_arguments
+    def parse_expression_list(end_token : Token::Token)
       arguments = [] of AST::Expression
 
-      if peek_token_is?(Token::RPAREN)
+      if peek_token_is?(end_token)
         next_token
         return arguments
       end
@@ -324,7 +350,7 @@ module Parser
         arguments << parse_expression(Precedences::Lowest)
       end
 
-      if !expect_peek(Token::RPAREN)
+      if !expect_peek(end_token)
         return [] of AST::Expression
       end
 

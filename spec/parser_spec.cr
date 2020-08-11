@@ -235,7 +235,8 @@ describe "Parser" do
       {:input => "a + add(b * c) + d", :output => "((a + add((b * c))) + d)"},
       {:input => "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", :output => "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"},
       {:input => "add(a + b + c * d / f + g)", :output => "add((((a + b) + ((c * d) / f)) + g))"},
-
+      {:input => "a * [1, 2, 3, 4][b * c] * d", :output => "((a * ([1, 2, 3, 4][(b * c)])) * d)"},
+      {:input => "add(a * b[2], b[1], 2 * [1, 2][1])", :output => "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"},
     ] of Hash(Symbol, String)
 
     tests.each do |test|
@@ -398,5 +399,50 @@ describe "Parser" do
     test_literal(expression.arguments[0], 1_i64)
     test_infix(expression.arguments[1], 2.3, "*", 3.4)
     test_infix(expression.arguments[2], 4_i64, "+", 5_i64)
+  end
+
+  it "should handle array literals" do
+    input = "[1, 2 * 3, 3 + 3]"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    statement = program.statements[0].as(AST::ExpressionStatement)
+    array = statement.expression.as(AST::ArrayLiteral)
+
+    statement.should be_a(AST::ExpressionStatement)
+    array.should be_a(AST::ArrayLiteral)
+
+    array.elements.size.should eq(3)
+
+    test_literal(array.elements[0], 1_i64)
+    test_infix(array.elements[1], 2_i64, "*", 3_i64)
+    test_infix(array.elements[2], 3_i64, "+", 3_i64)
+  end
+
+  it "should handle array index expressions" do
+    input = "foo[1 + 1]"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    statement = program.statements[0].as(AST::ExpressionStatement)
+    index = statement.expression.as(AST::IndexExpression)
+
+    statement.should be_a(AST::ExpressionStatement)
+    index.should be_a(AST::IndexExpression)
+
+    test_literal(index.left, "foo")
+    test_infix(index.index, 1_i64, "+", 1_i64)
   end
 end

@@ -80,6 +80,16 @@ module Evaluator
         return args[0] if args.size == 1 && error?(args[0])
         return error("Object is not a function") if !function.is_a? PheltObject::Function | PheltObject::Builtin
         return apply_function(function.as(PheltObject::Function | PheltObject::Builtin), args)
+      when AST::ArrayLiteral
+        elements = eval_expressions(node.elements, env)
+        return elements[0] if elements.size == 1 && error?(elements[0])
+        return PheltObject::Array.new(elements)
+      when AST::IndexExpression
+        left = eval(node.left, env)
+        return left if error?(left)
+        index = eval(node.index, env)
+        return index if error?(index)
+        return eval_index_expression(left, index)
       else
         return NULL
       end
@@ -161,6 +171,24 @@ module Evaluator
       end
 
       return result
+    end
+
+    def eval_index_expression(left, index : PheltObject::Object)
+      if left.is_a? PheltObject::Array && index.is_a? PheltObject::Integer
+        return eval_array_index_expression(left, index)
+      end
+      return error("Invalid index operator, #{left.type}")
+    end
+
+    def eval_array_index_expression(array : PheltObject::Array, index : PheltObject::Integer)
+      index = index.value
+      max = array.elements.size - 1
+
+      if index < 0 || index > max
+        return NULL
+      end
+
+      return array.elements[index]
     end
 
     def eval_if_expression(expression : AST::IfExpression, env : PheltObject::Environment)
