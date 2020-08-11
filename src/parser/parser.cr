@@ -341,13 +341,21 @@ module Parser
 
       next_token
 
-      identifiers << AST::Identifier.new(@cur_token, @cur_token.literal)
+      if (@cur_token.type != Token::IDENT.type)
+        errors << "Unexpected argument type #{@cur_token.type}, expected IDENT"
+      else
+        identifiers << AST::Identifier.new(@cur_token, @cur_token.literal)
+      end
 
       while peek_token_is?(Token::COMMA)
         next_token
         next_token
 
-        identifiers << AST::Identifier.new(@cur_token, @cur_token.literal)
+        if (@cur_token.type != Token::IDENT.type)
+          errors << "Unexpected argument type #{@cur_token.type}, expected IDENT"
+        else
+          identifiers << AST::Identifier.new(@cur_token, @cur_token.literal)
+        end
       end
 
       if !expect_peek(Token::RPAREN)
