@@ -63,7 +63,22 @@ module Evaluator
   end
 
   define_builtin("push", 2, PheltObject::Array) do
-    first.elements.push(second.as(PheltObject::Object))
-    return first
+    array.elements.push(second.as(PheltObject::Object))
+    return array
+  end
+
+  define_builtin("pop", 1, PheltObject::Array) do
+    popped = array.elements.pop
+    return popped
+  end
+
+  define_builtin("shift", 1, PheltObject::Array) do
+    shifted = array.elements.shift
+    return shifted
+  end
+
+  define_builtin("unshift", 2, PheltObject::Array) do
+    array.elements.unshift(second.as(PheltObject::Object))
+    return array
   end
 end
