@@ -37,6 +37,16 @@ end
 module Evaluator
   BUILTINS = {} of String => PheltObject::Builtin
 
+  define_builtin("puts") do
+    args.each do |value|
+      STDOUT.puts value.inspect
+    end
+  end
+
+  define_builtin("inspect", 1) do
+    return PheltObject::String.new(first.inspect.to_s)
+  end
+
   define_builtin("eval", 1, PheltObject::String) do
     parser = Parser::Parser.new(Lexer::Lexer.new(string.value))
     evaluator = ::Evaluator::Evaluator.new(parser.parse_program, env)
