@@ -2,28 +2,32 @@ require "../object/*"
 require "../lexer"
 require "../parser"
 
-macro define_builtin(name, expected_args, expected_type = nil, &block)
+macro define_builtin(name, expected_args = false, expected_type = nil, &block)
   BUILTINS[{{name}}] = PheltObject::Builtin.new(
     function = PheltObject::BuiltinFunction.new do |args, env|
+      {% if expected_args %}
       if args.size != {{expected_args}}
         return PheltObject::Error.new("Wrong number of arguments, got #{args.size}, expected #{{{expected_args}}}", "", 0, 0)
       end
-
-      first = args[0]
-      second = args[1] if args[1]?
-      third = args[2] if args[2]?
-      args = args[3..]?
-
-      {% if expected_type %}
-      unless first.is_a? {{expected_type}}
-        return PheltObject::Error.new("First argument to `#{{{name}}}` must be #{{{expected_type}}::TYPE}, got #{first.type}", "", 0, 0)
-      else
-        {% type = expected_type.resolve.name.downcase.split("::").last %}
-        {{type.id}} = first
-      end
       {% end %}
 
-      {{ block.body }}
+      if args.is_a? Array
+        first = args[0]
+        second = args[1] if args[1]?
+        third = args[2] if args[2]?
+        rest = args[3..] if args[3..]?
+
+        {% if expected_type %}
+        unless first.is_a? {{expected_type}}
+          return PheltObject::Error.new("First argument to `#{{{name}}}` must be #{{{expected_type}}::TYPE}, got #{first.type}", "", 0, 0)
+        else
+          {% type = expected_type.resolve.name.downcase.split("::").last %}
+          {{type.id}} = first
+        end
+        {% end %}
+
+        {{ block.body }}
+      end
 
       return ::Evaluator::Evaluator::NULL
     end
