@@ -472,6 +472,58 @@ describe "Parser" do
     test_infix(array.elements[2], 3_i64, "+", 3_i64)
   end
 
+  it "should handle hash literals" do
+    input = "{one: 1, two: 2, three: 3}"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    statement = program.statements[0].as(AST::ExpressionStatement)
+    hash = statement.expression.as(AST::HashLiteral)
+
+    statement.should be_a(AST::ExpressionStatement)
+    hash.should be_a(AST::HashLiteral)
+
+    hash.pairs.size.should eq(3)
+
+    expected = {
+      "one"   => 1_i64,
+      "two"   => 2_i64,
+      "three" => 3_i64,
+    }
+
+    hash.pairs.each do |key, value|
+      key = key.as(AST::Identifier)
+      expected_value = expected[key.value]
+      test_literal(value, expected_value)
+    end
+  end
+
+  it "should handle empty hash literals" do
+    input = "{}"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    statement = program.statements[0].as(AST::ExpressionStatement)
+    hash = statement.expression.as(AST::HashLiteral)
+
+    statement.should be_a(AST::ExpressionStatement)
+    hash.should be_a(AST::HashLiteral)
+
+    hash.pairs.size.should eq(0)
+  end
+
   it "should handle array index expressions" do
     input = "foo[1 + 1]"
 

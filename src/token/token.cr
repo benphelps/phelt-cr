@@ -51,8 +51,10 @@ module Token
   NOT_EQ = Token.new("NOT_EQ", "!=")
 
   # Delimiters
+  PERIOD    = Token.new("PERIOD", ".")
   COMMA     = Token.new("COMMA", ",")
   SEMICOLON = Token.new("SEMICOLON", ";")
+  COLON     = Token.new("COLON", ":")
   LPAREN    = Token.new("LPAREN", "(")
   RPAREN    = Token.new("RPAREN", ")")
   LBRACE    = Token.new("LBRACE", "{")

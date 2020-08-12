@@ -1,15 +1,9 @@
 require "../ast"
 
 module PheltObject
-  struct Type
-    property value : ::String
-
-    def initialize(@value)
-    end
-  end
-
   alias Number = Integer | Float
-  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin | Array
+  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin | Array | Hash
+  alias Hashable = Integer | String
 
   class Integer
     TYPE = "number"
@@ -25,6 +19,10 @@ module PheltObject
 
     def inspect
       @value.to_s
+    end
+
+    def hash_key
+      HashKey.new(Integer, value.hash)
     end
   end
 
@@ -76,6 +74,10 @@ module PheltObject
     def inspect
       @value.to_s
     end
+
+    def hash_key
+      HashKey.new(String, value.hash)
+    end
   end
 
   class Array
@@ -92,6 +94,48 @@ module PheltObject
 
     def inspect
       "[#{elements.join(", ", &.inspect)}]"
+    end
+  end
+
+  class HashKey
+    property type : String.class | Integer.class
+    property value : UInt64
+    def_hash @type, @value
+
+    def initialize(@type, @value)
+    end
+
+    def ==(other)
+      other.type == @type && other.value == @value
+    end
+  end
+
+  class HashPair
+    property key : Hashable
+    property value : Object
+    def_hash @key, @value
+
+    def initialize(@key, @value)
+    end
+  end
+
+  class Hash
+    TYPE = "hash"
+
+    property pairs : ::Hash(HashKey, HashPair)
+
+    def initialize(@pairs)
+    end
+
+    def type
+      TYPE
+    end
+
+    def inspect
+      string = @pairs.join(", ") { |key, pair|
+        "#{pair.key.inspect}: #{pair.value.inspect}"
+      }
+      "{#{string}}"
     end
   end
 

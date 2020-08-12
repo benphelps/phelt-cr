@@ -17,6 +17,7 @@ module Parser
     Prefix      # -X or !X
     Call        # myFunction(X)
     Index       # array[index]
+    HashAccess  # hash.access
   end
 
   class Parser
@@ -39,6 +40,7 @@ module Parser
       Token::ASTERISK.type => Precedences::Product,
       Token::LPAREN.type   => Precedences::Call,
       Token::LBRACKET.type => Precedences::Index,
+      Token::PERIOD.type   => Precedences::HashAccess,
     } of Token::Type => Precedences
 
     def initialize(@lexer : Lexer::Lexer)
@@ -55,6 +57,8 @@ module Parser
       register_parser_do_literal
       register_parser_array_literal
       register_parser_array_index
+      register_parser_hash_literal
+      register_parser_hash_access
 
       register_parser_call_expression
 
@@ -224,6 +228,50 @@ module Parser
         AST::IndexExpression.new(token = @cur_token, left, index)
       end
       @infix_parsers[Token::LBRACKET.type] = parser
+    end
+
+    def register_parser_hash_literal
+      parser = PrefixParser.new do
+        token = @cur_token
+        pairs = {} of AST::Expression => AST::Expression
+
+        while !peek_token_is?(Token::RBRACE)
+          next_token
+
+          key = parse_expression(Precedences::Lowest)
+
+          if !expect_peek(Token::COLON)
+            return AST::ErrorExpression.new(@cur_token, @errors.last)
+          end
+
+          next_token
+
+          value = parse_expression(Precedences::Lowest)
+
+          pairs[key] = value
+
+          if !peek_token_is?(Token::RBRACE) && !expect_peek(Token::COMMA)
+            return AST::ErrorExpression.new(@cur_token, @errors.last)
+          end
+        end
+
+        if !expect_peek(Token::RBRACE)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        AST::HashLiteral.new(token, pairs)
+      end
+      @prefix_parsers[Token::LBRACE.type] = parser
+    end
+
+    def register_parser_hash_access
+      parser = InfixParser.new do |left|
+        token = @cur_token
+        next_token
+        index = AST::Identifier.new(@cur_token, @cur_token.literal)
+        AST::HashAccessExpression.new(token, left, index)
+      end
+      @infix_parsers[Token::PERIOD.type] = parser
     end
 
     def register_parser_infix_expression

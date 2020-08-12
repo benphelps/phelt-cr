@@ -93,12 +93,20 @@ module Evaluator
         elements = eval_expressions(node.elements, env)
         return elements[0] if elements.size == 1 && error?(elements[0])
         return PheltObject::Array.new(elements)
+      when AST::HashLiteral
+        return eval_hash_literal(node, env)
       when AST::IndexExpression
         left = eval(node.left, env)
         return left if error?(left)
         index = eval(node.index, env)
         return index if error?(index)
         return eval_index_expression(left, index)
+      when AST::HashAccessExpression
+        left = eval(node.left, env)
+        return left if error?(left)
+        index = PheltObject::String.new(node.index.value)
+        return error("Object is not a hash") if !left.is_a? PheltObject::Hash
+        return eval_hash_access_expression(left.as(PheltObject::Hash), index)
       else
         return NULL
       end
@@ -192,6 +200,9 @@ module Evaluator
       if left.is_a? PheltObject::Array && index.is_a? PheltObject::Integer
         return eval_array_index_expression(left, index)
       end
+      if left.is_a? PheltObject::Hash && index.is_a? PheltObject::Hashable
+        return eval_hash_index_expression(left, index)
+      end
       return error("Invalid index operator, #{left.type}")
     end
 
@@ -204,6 +215,59 @@ module Evaluator
       end
 
       return array.elements[index]
+    end
+
+    def eval_hash_index_expression(hash : PheltObject::Hash, index : PheltObject::Hashable)
+      unless index.is_a? PheltObject::Hashable
+        return error("Cannot use a #{index.type} as a hash key")
+      end
+
+      if hash.pairs.has_key? index.hash_key
+        return hash.pairs[index.hash_key].value
+      else
+        return NULL
+      end
+    end
+
+    def eval_hash_access_expression(hash : PheltObject::Hash, index : PheltObject::Hashable)
+      unless index.is_a? PheltObject::Hashable
+        return error("Cannot use a #{index.type} as a hash key")
+      end
+
+      if hash.pairs.has_key? index.hash_key
+        return hash.pairs[index.hash_key].value
+      else
+        return NULL
+      end
+    end
+
+    def eval_hash_literal(node : AST::HashLiteral, env : PheltObject::Environment)
+      pairs = {} of PheltObject::HashKey => PheltObject::HashPair
+
+      node.pairs.each do |key_node, value_node|
+        case key_node
+        when AST::Identifier
+          key = PheltObject::String.new(key_node.value)
+        when AST::IntegerLiteral
+          key = PheltObject::Integer.new(key_node.value)
+        else
+          @current_token = key_node.token
+          key = error("Cannot use a #{key_node.token.type.downcase} as a hash key")
+        end
+
+        unless key.is_a? PheltObject::Hashable
+          return key
+        end
+
+        value = eval(value_node, env)
+        return value if error?(value)
+
+        if key.is_a? PheltObject::Hashable
+          pairs[key.hash_key] = PheltObject::HashPair.new(key, value)
+        end
+      end
+
+      return PheltObject::Hash.new(pairs)
     end
 
     def eval_if_expression(expression : AST::IfExpression, env : PheltObject::Environment)

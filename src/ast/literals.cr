@@ -113,4 +113,23 @@ module AST
       "[#{@elements.join(", ", &.string)}]"
     end
   end
+
+  class HashLiteral < Expression
+    property token : Token::Token
+    property pairs : Hash(Expression, Expression)
+
+    def initialize(@token, @pairs)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      string = @pairs.join(", ") { |key, value|
+        "#{key.string}: #{value.string}"
+      }
+      "{#{string}}"
+    end
+  end
 end

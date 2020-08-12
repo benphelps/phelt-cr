@@ -85,6 +85,10 @@ module Lexer
         token = new_token(Token::GT, @char)
       when ';' # Delimiters
         token = new_token(Token::SEMICOLON, @char)
+      when ':'
+        token = new_token(Token::COLON, @char)
+      when '.'
+        token = new_token(Token::PERIOD, @char)
       when ','
         token = new_token(Token::COMMA, @char)
       when '('

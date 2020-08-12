@@ -135,4 +135,21 @@ module AST
       "(#{left.string}[#{index.string}])"
     end
   end
+
+  class HashAccessExpression < Expression
+    property token : Token::Token
+    property left : Expression
+    property index : Identifier
+
+    def initialize(@token, @left, @index)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "(#{left.string}[#{index.string}])"
+    end
+  end
 end

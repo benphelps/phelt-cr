@@ -136,6 +136,7 @@ describe "Evaluator" do
       {:input => "if (10 > 5) {\n  return -true;\n}", :expected => "Unkown operator -boolean"},
       {:input => "if (10 > 5) {\n  return true + false;\n}", :expected => "Unkown operator boolean + boolean"},
       {:input => "foobar;", :expected => "Undefined identifier foobar"},
+      {:input => "{ true: false }", :expected => "Cannot use a true as a hash key"},
     ]
 
     tests.each do |test|
@@ -272,6 +273,48 @@ describe "Evaluator" do
       {input: "let array = [1, 2, 3]; let i = array[0]; array[i];", expected: 2},
       {input: "[1, 2, 3][4]", expected: nil},
       {input: "[1, 2, 3][-1]", expected: nil},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate hash literals" do
+    input = "{ one: 1, two: 2, three: 1 + 2, 4: 4, 5: 5 }"
+    evaluated = eval(input)
+
+    evaluated.should be_a(PheltObject::Hash)
+    hash = evaluated.as(PheltObject::Hash)
+
+    hash.pairs.size.should eq(5)
+
+    tests = {
+      PheltObject::String.new("one").hash_key   => 1_i64,
+      PheltObject::String.new("two").hash_key   => 2_i64,
+      PheltObject::String.new("three").hash_key => 3_i64,
+      PheltObject::Integer.new(4_i64).hash_key  => 4_i64,
+      PheltObject::Integer.new(5_i64).hash_key  => 5_i64,
+    }
+
+    tests.each do |key, value|
+      pair = hash.pairs[key]
+      test_object(pair.value, value)
+    end
+  end
+
+  it "should evaluate array index expressions" do
+    tests = [
+      {input: "{ foo: 1 }.foo", expected: 1},
+      {input: "{ foo: 1 }.bar", expected: nil},
+      {input: "{ foo: 1 }[\"foo\"]", expected: 1},
+      {input: "{ foo: 1 }[\"bar\"]", expected: nil},
+      {input: "{ 1: \"foo\" }[1]", expected: "foo"},
+      {input: "{ 1: \"foo\" }[2]", expected: nil},
+      {input: "{ }.foo", expected: nil},
+      {input: "{ }[\"foo\"]", expected: nil},
+      {input: "let key = \"foo\"; { foo: 1 }[key] ", expected: 1},
     ]
 
     tests.each do |test|

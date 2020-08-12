@@ -1,7 +1,7 @@
 module PheltObject
   class Environment
     property constants : ::Array(::String) = [] of ::String
-    property store : Hash(::String, PheltObject::Object)
+    property store : ::Hash(::String, PheltObject::Object)
     property outer : PheltObject::Environment?
 
     def initialize(@outer = nil)
