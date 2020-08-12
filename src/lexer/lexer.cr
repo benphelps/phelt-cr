@@ -139,7 +139,7 @@ module Lexer
     def read_number
       have_decimal = false
       position = @position
-      while ::Lexer.is_number?(@char) || (have_decimal == false && @char == '.')
+      while ::Lexer.is_number?(@char) || (have_decimal == false && @char == '.' && ::Lexer.is_number?(peek_char()))
         have_decimal = true if @char == '.'
         read_char()
       end
