@@ -10,9 +10,10 @@ module Parser
 
   enum Precedences
     Lowest      # none
+    Assignment  # =, +=, -=, etc
     Equals      # ==
     LessGreater # > or <
-    Sum         # +
+    Sum         # +, -
     Product     # *
     Prefix      # -X or !X
     Call        # myFunction(X)
@@ -30,17 +31,21 @@ module Parser
     @infix_parsers = {} of Token::Type => InfixParser
 
     @precedences = {
-      Token::EQ.type       => Precedences::Equals,
-      Token::NOT_EQ.type   => Precedences::Equals,
-      Token::LT.type       => Precedences::LessGreater,
-      Token::GT.type       => Precedences::LessGreater,
-      Token::PLUS.type     => Precedences::Sum,
-      Token::MINUS.type    => Precedences::Sum,
-      Token::SLASH.type    => Precedences::Product,
-      Token::ASTERISK.type => Precedences::Product,
-      Token::LPAREN.type   => Precedences::Call,
-      Token::LBRACKET.type => Precedences::Index,
-      Token::PERIOD.type   => Precedences::HashAccess,
+      Token::PLUS_ASSIGN.type     => Precedences::Assignment,
+      Token::MINUS_ASSIGN.type    => Precedences::Assignment,
+      Token::SLASH_ASSIGN.type    => Precedences::Assignment,
+      Token::ASTERISK_ASSIGN.type => Precedences::Assignment,
+      Token::EQ.type              => Precedences::Equals,
+      Token::NOT_EQ.type          => Precedences::Equals,
+      Token::LT.type              => Precedences::LessGreater,
+      Token::GT.type              => Precedences::LessGreater,
+      Token::PLUS.type            => Precedences::Sum,
+      Token::MINUS.type           => Precedences::Sum,
+      Token::SLASH.type           => Precedences::Product,
+      Token::ASTERISK.type        => Precedences::Product,
+      Token::LPAREN.type          => Precedences::Call,
+      Token::LBRACKET.type        => Precedences::Index,
+      Token::PERIOD.type          => Precedences::HashAccess,
     } of Token::Type => Precedences
 
     def initialize(@lexer : Lexer::Lexer)
@@ -51,6 +56,7 @@ module Parser
       register_parser_string_literal
       register_parser_prefix_expression
       register_parser_infix_expression
+      register_parser_assignment_infix_expression
       register_parser_grouped_expression
       register_parser_if_expression
       register_parser_function_literal
@@ -292,6 +298,22 @@ module Parser
       @infix_parsers[Token::NOT_EQ.type] = parser
       @infix_parsers[Token::LT.type] = parser
       @infix_parsers[Token::GT.type] = parser
+    end
+
+    def register_parser_assignment_infix_expression
+      parser = InfixParser.new do |left|
+        token = @cur_token
+        operator = @cur_token.literal
+        precedence = cur_precedence
+        next_token
+        right = parse_expression(precedence)
+        AST::AssignmentInfixExpression.new(token, operator, left, right)
+      end
+
+      @infix_parsers[Token::PLUS_ASSIGN.type] = parser
+      @infix_parsers[Token::MINUS_ASSIGN.type] = parser
+      @infix_parsers[Token::SLASH_ASSIGN.type] = parser
+      @infix_parsers[Token::ASTERISK_ASSIGN.type] = parser
     end
 
     def register_parser_grouped_expression

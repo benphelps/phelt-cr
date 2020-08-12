@@ -53,6 +53,12 @@ module Evaluator
         right = eval(node.right, env)
         return right if error?(right)
         return eval_infix_expression(node.operator, left, right)
+      when AST::AssignmentInfixExpression
+        left = node.left
+        @current_token = node.right.token
+        right = eval(node.right, env)
+        return right if error?(right)
+        return eval_assignment_infix_expression(node.operator, left, right)
       when AST::BlockStatement
         return eval_block_statement(node, env)
       when AST::IfExpression
@@ -371,6 +377,18 @@ module Evaluator
       return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
+    def eval_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Object)
+      if left.is_a?(AST::Expression) && right.is_a?(PheltObject::Number)
+        return eval_number_assignment_infix_expression(operator, left, right)
+      end
+
+      if left.is_a?(AST::Expression) && right.is_a?(PheltObject::String)
+        return eval_string_assignment_infix_expression(operator, left, right)
+      end
+
+      return error("Unkown assignment operator #{operator}")
+    end
+
     def eval_number_infix_expression(operator : String, left : PheltObject::Number, right : PheltObject::Number)
       if left.is_a?(PheltObject::Number) && right.is_a?(PheltObject::Number)
         left_val = left.value
@@ -404,6 +422,43 @@ module Evaluator
       return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
+    def eval_number_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Number)
+      if left.is_a?(AST::Identifier) && right.is_a?(PheltObject::Number)
+        if !env.exists?(left.value)
+          @current_token = left.token
+          return error("Undefined identifier #{left.value}")
+        end
+
+        left_obj = env.get(left.value)
+
+        if left_obj.is_a?(PheltObject::Number)
+          left_val = left_obj.value
+          right_val = right.value
+
+          case operator
+          when "+="
+            value = left_val + right_val
+          when "-="
+            value = left_val - right_val
+          when "*="
+            value = left_val * right_val
+          when "/="
+            value = left_val / right_val
+          else
+            return error("Unkown assignment operator #{operator} for #{left_obj.type}")
+          end
+
+          value = PheltObject::Integer.new(value.to_i64) if value.is_a? Int
+          value = PheltObject::Float.new(value.to_f64) if value.is_a? Float
+
+          env.set(left.value, value)
+
+          return value
+        end
+      end
+      return error("Unkown assignment operator for #{left.class} #{operator} #{right.type}")
+    end
+
     def eval_string_infix_expression(operator : String, left : PheltObject::String, right : PheltObject::String)
       if left.is_a?(PheltObject::String) && right.is_a?(PheltObject::String)
         left_val = left.value
@@ -419,6 +474,36 @@ module Evaluator
         return PheltObject::String.new(value) if value.is_a? String
       end
       return error("Unkown operator #{left.type} #{operator} #{right.type}")
+    end
+
+    def eval_string_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::String)
+      if left.is_a?(AST::Identifier) && right.is_a?(PheltObject::String)
+        if !env.exists?(left.value)
+          @current_token = left.token
+          return error("Undefined identifier #{left.value}")
+        end
+
+        left_obj = env.get(left.value)
+
+        if left_obj.is_a?(PheltObject::String)
+          left_val = left_obj.value
+          right_val = right.value
+
+          case operator
+          when "+="
+            value = left_val + right_val
+          else
+            return error("Unkown assignment operator #{operator} for #{left_obj.type}")
+          end
+
+          value = PheltObject::String.new(value)
+
+          env.set(left.value, value)
+
+          return value
+        end
+      end
+      return error("Unkown assignment operator for #{left.class} #{operator} #{right.type}")
     end
 
     def error?(value)

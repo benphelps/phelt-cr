@@ -192,6 +192,21 @@ describe "Evaluator" do
     end
   end
 
+  it "should evaluate assignment infix statements" do
+    tests = [
+      {input: "let foo = 5; foo += 5", expected: 10},
+      {input: "let foo = 5; foo /= 2", expected: 2.5},
+      {input: "let foo = 5; foo *= 2", expected: 10},
+      {input: "let foo = 5; foo -= 5", expected: 0},
+      {input: "let foo = \"foo\"; foo += \"bar\"", expected: "foobar"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
   it "should evaluate function objects" do
     tests = [
       {input: "fn(x) { x + 2 }", expected: 10},

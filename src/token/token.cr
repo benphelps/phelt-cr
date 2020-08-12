@@ -37,14 +37,18 @@ module Token
   STRING = Token.new("STRING", "string")
 
   # Operators
-  ASSIGN   = Token.new("ASSIGN", "=")
-  PLUS     = Token.new("PLUS", "+")
-  MINUS    = Token.new("MINUS", "-")
-  BANG     = Token.new("BANG", "!")
-  ASTERISK = Token.new("ASTERISK", "*")
-  SLASH    = Token.new("SLASH", "/")
-  LT       = Token.new("LT", "<")
-  GT       = Token.new("GT", ">")
+  ASSIGN          = Token.new("ASSIGN", "=")
+  PLUS            = Token.new("PLUS", "+")
+  MINUS           = Token.new("MINUS", "-")
+  BANG            = Token.new("BANG", "!")
+  ASTERISK        = Token.new("ASTERISK", "*")
+  SLASH           = Token.new("SLASH", "/")
+  LT              = Token.new("LT", "<")
+  GT              = Token.new("GT", ">")
+  PLUS_ASSIGN     = Token.new("PLUS_ASSIGN", "+=")
+  MINUS_ASSIGN    = Token.new("MINUS_ASSIGN", "-=")
+  ASTERISK_ASSIGN = Token.new("ASTERISK_ASSIGN", "*=")
+  SLASH_ASSIGN    = Token.new("SLASH_ASSIGN", "/=")
 
   # Comparators
   EQ     = Token.new("EQ", "==")

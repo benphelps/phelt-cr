@@ -80,6 +80,24 @@ module AST
     end
   end
 
+  class AssignmentInfixExpression < Expression
+    property token : Token::Token
+    property operator : String
+    property left : Expression
+    property right : Expression
+
+    def initialize(@token, @operator, @left, @right)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "(#{left.string} #{@operator} #{@right.string})"
+    end
+  end
+
   class IfExpression < Expression
     property token : Token::Token
     property condition : Expression

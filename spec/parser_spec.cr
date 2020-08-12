@@ -230,6 +230,35 @@ describe "Parser" do
     end
   end
 
+  it "should parse assignment infix expressions" do
+    tests = [
+      {:input => "a += 5;", :left => "a", :operator => "+=", :right => 5_i64},
+      {:input => "a -= 5;", :left => "a", :operator => "-=", :right => 5_i64},
+      {:input => "a *= 5;", :left => "a", :operator => "*=", :right => 5_i64},
+      {:input => "a /= 5;", :left => "a", :operator => "/=", :right => 5_i64},
+    ]
+
+    tests.each do |test|
+      lexer = Lexer::Lexer.new(test[:input].as(String))
+      parser = Parser::Parser.new(lexer)
+      program = parser.parse_program
+      check_parser_errors(parser)
+
+      program.should_not be_nil
+      program.statements.size.should eq(1)
+
+      statement = program.statements[0].as(AST::ExpressionStatement)
+      expression = statement.expression.as(AST::AssignmentInfixExpression)
+
+      statement.should be_a(AST::ExpressionStatement)
+      expression.should be_a(AST::AssignmentInfixExpression)
+
+      test_literal(expression.left, test[:left])
+      expression.operator.should eq(test[:operator])
+      test_literal(expression.right, test[:right])
+    end
+  end
+
   it "should handle operator precedence" do
     tests = [
       {:input => "-a * b", :output => "((-a) * b)"},

@@ -56,4 +56,6 @@ describe Lexer::Lexer do
   it_lexes "do", Token::DO
   it_lexes "const", Token::CONST
   it_lexes ":", Token::COLON
+  it_lexes "+=", Token::PLUS_ASSIGN
+  it_lexes "-=", Token::MINUS_ASSIGN
 end

@@ -24,6 +24,12 @@ def test_statement(statement : AST::LetStatement, name : String)
   statement.name.token_literal.should eq(name)
 end
 
+def test_statement(statement : AST::AssignmentInfixExpression, name : String)
+  statement.token_literal.should eq(name)
+  statement.identifier.value.should eq(name)
+  statement.name.token_literal.should eq(name)
+end
+
 def test_statement(statement : AST::ConstStatement, name : String)
   statement.token_literal.should eq(name)
   statement.name.value.should eq(name)

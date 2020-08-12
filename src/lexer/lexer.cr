@@ -63,9 +63,23 @@ module Lexer
           token = new_token(Token::ASSIGN, @char)
         end
       when '+'
-        token = new_token(Token::PLUS, @char)
+        if peek_char() == '='
+          char = @char
+          read_char()
+          literal = char.to_s + @char.to_s
+          token = new_token(Token::PLUS_ASSIGN, literal)
+        else
+          token = new_token(Token::PLUS, @char)
+        end
       when '-'
-        token = new_token(Token::MINUS, @char)
+        if peek_char() == '='
+          char = @char
+          read_char()
+          literal = char.to_s + @char.to_s
+          token = new_token(Token::MINUS_ASSIGN, literal)
+        else
+          token = new_token(Token::MINUS, @char)
+        end
       when '!'
         if peek_char() == '='
           char = @char
@@ -76,9 +90,23 @@ module Lexer
           token = new_token(Token::BANG, @char)
         end
       when '/'
-        token = new_token(Token::SLASH, @char)
+        if peek_char() == '='
+          char = @char
+          read_char()
+          literal = char.to_s + @char.to_s
+          token = new_token(Token::SLASH_ASSIGN, literal)
+        else
+          token = new_token(Token::SLASH, @char)
+        end
       when '*'
-        token = new_token(Token::ASTERISK, @char)
+        if peek_char() == '='
+          char = @char
+          read_char()
+          literal = char.to_s + @char.to_s
+          token = new_token(Token::ASTERISK_ASSIGN, literal)
+        else
+          token = new_token(Token::ASTERISK, @char)
+        end
       when '<'
         token = new_token(Token::LT, @char)
       when '>'
