@@ -9,11 +9,11 @@ module REPL
 
   class REPL
     def self.start
-      puts "phelt v0.0.1"
+      STDOUT.puts "phelt v0.0.1"
       env = PheltObject::Environment.new
 
       while true
-        print ::REPL::PROMPT
+        STDOUT.print ::REPL::PROMPT
         input = gets
         exit if input.nil? # Ctrl+D
         return if !input
@@ -22,11 +22,11 @@ module REPL
         program = parser.parse_program
 
         if parser.errors.size > 0
-          print ::REPL::PROMPT.colorize(:red)
-          puts parser.errors.join(", ")
+          STDERR.print ::REPL::PROMPT.colorize(:red)
+          STDERR.puts parser.errors.join(", ")
         else
           evaluator = Evaluator::Evaluator.new(program, env).eval
-          puts evaluator.inspect
+          STDOUT.puts evaluator.inspect
         end
       end
     end
@@ -37,7 +37,7 @@ module REPL
       puts "phelt parser debugger"
 
       while true
-        print ::REPL::PROMPT
+        STDOUT.print ::REPL::PROMPT
         input = gets
         exit if input.nil? # Ctrl+D
         return if !input
@@ -46,11 +46,11 @@ module REPL
         program = parser.parse_program
 
         if parser.errors.size > 0
-          print ::REPL::PROMPT.colorize(:red)
-          puts parser.errors.join(", ")
+          STDERR.print ::REPL::PROMPT.colorize(:red)
+          STDERR.puts parser.errors.join(", ")
         else
-          print ::REPL::PROMPT.colorize(:green)
-          puts "#{program.statements.join(",", &.token)} = #{program.string}"
+          STDOUT.print ::REPL::PROMPT.colorize(:green)
+          STDOUT.puts "#{program.statements.join(",", &.token)} = #{program.string}"
         end
       end
     end
