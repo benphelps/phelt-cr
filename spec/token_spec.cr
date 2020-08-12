@@ -58,4 +58,6 @@ describe Lexer::Lexer do
   it_lexes ":", Token::COLON
   it_lexes "+=", Token::PLUS_ASSIGN
   it_lexes "-=", Token::MINUS_ASSIGN
+  it_lexes "*=", Token::ASTERISK_ASSIGN
+  it_lexes "/=", Token::SLASH_ASSIGN
 end
