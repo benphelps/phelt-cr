@@ -4,17 +4,37 @@
 
 phelt is a toy programming language.
 
+## Features
+
+phelt is based on Monkey, as implemented in the Interpreter Book, with the following additions:
+
+* Run code from files, not just a REPL
+* Improved error reporting, including line and column information
+* 64 bit Floats & Integers
+* `do { }` blocks for scoped expressions
+* `eval()` for executing code from string input
+* Arrays are mutable, with an extended array toolset
+* Truly constant constants, once defined they can never be redefined, regardless of scope
+
 ## Installation
 
-TODO: Write installation instructions here
+Once you have Crystal setup locally, simply run:
+
+```sh
+shards build phelt
+```
+
+The phelt interpreter can be found in the bin/ directory.
 
 ## Usage
 
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
+```
+Usage: phelt [command] [program file]
+    -v, --version                    Show version
+    -h, --help                       Show help
+    -d, --debugger                   Interactive Debugger
+    -i, --interactive                Interactive REPL
+```
 
 ## Contributing
 
