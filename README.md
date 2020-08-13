@@ -19,7 +19,7 @@ phelt is based on Monkey, as implemented in the Interpreter Book, with the follo
 * Arrays are mutable, with an extended array toolset.
 * Truly constant constants, once defined they can never be redefined, regardless of scope.
 * Fully reworked hashes. Hash keys are limited to identifiers and integers. You can access as well as index hash entries, `hash.entry` or `hash["entry"]` both work.
-  * This allows for some level of psudo-class functionality.
+  * This allows for some level of pseudo-class functionality.
   * This may be expanded upon in the future by implementing meta-functions on hashes.
 
 ## Installation
