@@ -11,6 +11,7 @@ phelt is based on Monkey, as implemented in the Interpreter Book, with the follo
 * Run code from files, not just a REPL.
 * Improved error reporting, including line and column information.
 * 64 bit Floats & Integers.
+* Infix assignment operators `+=, -=, *= /=`.
 * `do { }` blocks for scoped expressions.
 * `eval()` for executing code from string input.
 * Arrays are mutable, with an extended array toolset.
