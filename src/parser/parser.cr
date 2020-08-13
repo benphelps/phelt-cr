@@ -39,6 +39,8 @@ module Parser
       Token::NOT_EQ.type          => Precedences::Equals,
       Token::LT.type              => Precedences::LessGreater,
       Token::GT.type              => Precedences::LessGreater,
+      Token::LT_EQ.type           => Precedences::LessGreater,
+      Token::GT_EQ.type           => Precedences::LessGreater,
       Token::PLUS.type            => Precedences::Sum,
       Token::MINUS.type           => Precedences::Sum,
       Token::SLASH.type           => Precedences::Product,
@@ -65,6 +67,7 @@ module Parser
       register_parser_array_index
       register_parser_hash_literal
       register_parser_hash_access
+      register_parser_for_expression
 
       register_parser_call_expression
 
@@ -82,10 +85,7 @@ module Parser
       program.orig = @lexer.input
       while @cur_token.type != Token::EOF.type
         statement = parse_statement()
-        # debug!(statement)
-        unless statement.nil?
-          program.statements << statement
-        end
+        program.statements << statement if statement.is_a? AST::Statement
         next_token
       end
       program
@@ -298,6 +298,8 @@ module Parser
       @infix_parsers[Token::NOT_EQ.type] = parser
       @infix_parsers[Token::LT.type] = parser
       @infix_parsers[Token::GT.type] = parser
+      @infix_parsers[Token::LT_EQ.type] = parser
+      @infix_parsers[Token::GT_EQ.type] = parser
     end
 
     def register_parser_assignment_infix_expression
@@ -375,6 +377,51 @@ module Parser
       end
 
       @prefix_parsers[Token::IF.type] = parser
+    end
+
+    def register_parser_for_expression
+      parser = PrefixParser.new do
+        token = @cur_token
+
+        if !expect_peek(Token::LPAREN)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        next_token
+
+        initial = parse_statement()
+
+        if !initial.is_a? AST::Statement
+          return AST::ErrorExpression.new(@cur_token, "Expected statement")
+        end
+
+        next_token
+
+        condition = parse_expression(Precedences::Lowest)
+
+        next_token
+        next_token
+
+        final = parse_expression(Precedences::Lowest)
+
+        if !expect_peek(Token::RPAREN)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        next_token
+
+        statement = parse_block_statement()
+
+        AST::ForExpression.new(
+          token,
+          initial,
+          condition,
+          final,
+          statement
+        )
+      end
+
+      @prefix_parsers[Token::FOR.type] = parser
     end
 
     def register_parser_function_literal
@@ -488,9 +535,7 @@ module Parser
 
       while !cur_token_is?(Token::RBRACE) && !cur_token_is?(Token::EOF)
         statement = parse_statement()
-        unless statement.nil?
-          block.statements << statement
-        end
+        block.statements << statement if statement.is_a? AST::Statement
         next_token
       end
 
@@ -500,14 +545,14 @@ module Parser
     def parse_let_statement
       token = @cur_token
 
-      return nil if !expect_peek(Token::IDENT)
+      return AST::ErrorExpression.new(@cur_token, @errors.last) if !expect_peek(Token::IDENT)
 
       name = AST::Identifier.new(
         token = @cur_token,
         value = @cur_token.literal
       )
 
-      return nil if !expect_peek(Token::ASSIGN)
+      return AST::ErrorExpression.new(@cur_token, @errors.last) if !expect_peek(Token::ASSIGN)
 
       next_token
 
@@ -523,14 +568,14 @@ module Parser
     def parse_const_statement
       token = @cur_token
 
-      return nil if !expect_peek(Token::IDENT)
+      return AST::ErrorExpression.new(@cur_token, @errors.last) if !expect_peek(Token::IDENT)
 
       name = AST::Identifier.new(
         token = @cur_token,
         value = @cur_token.literal
       )
 
-      return nil if !expect_peek(Token::ASSIGN)
+      return AST::ErrorExpression.new(@cur_token, @errors.last) if !expect_peek(Token::ASSIGN)
 
       next_token
 

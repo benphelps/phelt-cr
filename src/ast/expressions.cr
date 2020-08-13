@@ -120,6 +120,25 @@ module AST
     end
   end
 
+  class ForExpression < Expression
+    property token : Token::Token
+    property initial : AST::Statement
+    property condition : Expression
+    property final : Expression
+    property statement : BlockStatement
+
+    def initialize(@token, @initial, @condition, @final, @statement)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "for(#{@initial.string};#{@condition.string};#{@final.string} #{@statement.string}"
+    end
+  end
+
   class CallExpression < Expression
     property token : Token::Token
     property function : Expression

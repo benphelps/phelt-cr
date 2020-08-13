@@ -40,6 +40,11 @@ private def test_object(object : PheltObject::String, expected)
   object.value.should eq(expected)
 end
 
+private def test_object(object : PheltObject::Array, expected)
+  object.should be_a(PheltObject::Array)
+  object.inspect.should eq(expected)
+end
+
 private def test_object(object : PheltObject::Error, expected)
   object.should be_a(PheltObject::Error)
   object.message.should eq(expected)
@@ -184,6 +189,17 @@ describe "Evaluator" do
   it "should evaluate string concatenation" do
     tests = [
       {input: "\"foo\" + \"bar\"", expected: "foobar"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate for loops" do
+    tests = [
+      {input: "let array = []; for(let i = 1; i <= 10; i += 1) { push(array, i) } array", expected: "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"},
     ]
 
     tests.each do |test|

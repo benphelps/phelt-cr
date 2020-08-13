@@ -58,7 +58,7 @@ module Evaluator
         @current_token = node.right.token
         right = eval(node.right, env)
         return right if error?(right)
-        return eval_assignment_infix_expression(node.operator, left, right)
+        return eval_assignment_infix_expression(node.operator, left, right, env)
       when AST::BlockStatement
         return eval_block_statement(node, env)
       when AST::IfExpression
@@ -113,6 +113,8 @@ module Evaluator
         index = PheltObject::String.new(node.index.value)
         return error("Object is not a hash") if !left.is_a? PheltObject::Hash
         return eval_hash_access_expression(left.as(PheltObject::Hash), index)
+      when AST::ForExpression
+        return apply_for(node, env)
       else
         return NULL
       end
@@ -160,6 +162,24 @@ module Evaluator
       extended_env = PheltObject::Environment.new(env)
       evaluated = eval(body, extended_env)
       return unwrap_return_value(evaluated)
+    end
+
+    def apply_for(node : AST::ForExpression, env : PheltObject::Environment)
+      extended_env = PheltObject::Environment.new(env)
+      initial = eval(node.initial, extended_env)
+
+      loop do
+        condition = eval(node.condition, extended_env)
+        if condition == FALSE
+          break
+        end
+        evaluated = eval(node.statement, extended_env)
+        return evaluated if error?(evaluated)
+        final = eval(node.final, extended_env)
+        return final if error?(final)
+      end
+
+      return NULL
     end
 
     def extend_function_env(function : PheltObject::Function, args : Array(PheltObject::Object))
@@ -377,13 +397,13 @@ module Evaluator
       return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
-    def eval_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Object)
+    def eval_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Object, env : PheltObject::Environment)
       if left.is_a?(AST::Expression) && right.is_a?(PheltObject::Number)
-        return eval_number_assignment_infix_expression(operator, left, right)
+        return eval_number_assignment_infix_expression(operator, left, right, env)
       end
 
       if left.is_a?(AST::Expression) && right.is_a?(PheltObject::String)
-        return eval_string_assignment_infix_expression(operator, left, right)
+        return eval_string_assignment_infix_expression(operator, left, right, env)
       end
 
       return error("Unkown assignment operator #{operator}")
@@ -407,6 +427,10 @@ module Evaluator
           value = left_val < right_val
         when ">"
           value = left_val > right_val
+        when "<="
+          value = left_val <= right_val
+        when ">="
+          value = left_val >= right_val
         when "=="
           value = left_val == right_val
         when "!="
@@ -422,7 +446,7 @@ module Evaluator
       return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
-    def eval_number_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Number)
+    def eval_number_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Number, env : PheltObject::Environment)
       if left.is_a?(AST::Identifier) && right.is_a?(PheltObject::Number)
         if !env.exists?(left.value)
           @current_token = left.token
@@ -476,7 +500,7 @@ module Evaluator
       return error("Unkown operator #{left.type} #{operator} #{right.type}")
     end
 
-    def eval_string_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::String)
+    def eval_string_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::String, env : PheltObject::Environment)
       if left.is_a?(AST::Identifier) && right.is_a?(PheltObject::String)
         if !env.exists?(left.value)
           @current_token = left.token

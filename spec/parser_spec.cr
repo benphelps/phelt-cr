@@ -573,4 +573,51 @@ describe "Parser" do
     test_literal(index.left, "foo")
     test_infix(index.index, 1_i64, "+", 1_i64)
   end
+
+  it "should handle for expressions" do
+    input = "for(let i = 1; i < 10; i += 1) { i }"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    program.statements[0].should be_a(AST::ExpressionStatement)
+    statement = program.statements[0].as(AST::ExpressionStatement)
+
+    statement.expression.should be_a(AST::ForExpression)
+    for_exp = statement.expression.as(AST::ForExpression)
+
+    for_exp.should be_a(AST::ForExpression)
+
+    for_exp.initial.should be_a(AST::LetStatement)
+    initial = for_exp.initial.as(AST::LetStatement)
+    test_statement(initial, "i")
+    test_literal(initial.value, 1_i64)
+
+    for_exp.condition.should be_a(AST::InfixExpression)
+    condition = for_exp.condition.as(AST::InfixExpression)
+    test_literal(condition.left, "i")
+    condition.operator.should eq("<")
+    test_literal(condition.right, 10_i64)
+
+    for_exp.final.should be_a(AST::AssignmentInfixExpression)
+    final = for_exp.final.as(AST::AssignmentInfixExpression)
+    test_literal(final.left, "i")
+    final.operator.should eq("+=")
+    test_literal(final.right, 1_i64)
+
+    for_exp.statement.should be_a(AST::BlockStatement)
+    statement = for_exp.statement.as(AST::BlockStatement)
+    statement.statements.size.should eq(1)
+
+    statement_stmt = statement.statements[0].as(AST::ExpressionStatement)
+    statement_exp = statement_stmt.expression.as(AST::Identifier)
+
+    statement_exp.value.should eq("i")
+    statement_exp.token_literal.should eq("i")
+  end
 end

@@ -18,6 +18,7 @@ module Token
     "else"   => ELSE,
     "return" => RETURN,
     "do"     => DO,
+    "for"    => FOR,
   } of String => Token
 
   def self.lookup_ident(ident : String)
@@ -45,6 +46,8 @@ module Token
   SLASH           = Token.new("SLASH", "/")
   LT              = Token.new("LT", "<")
   GT              = Token.new("GT", ">")
+  LT_EQ           = Token.new("LT_EQ", "<=")
+  GT_EQ           = Token.new("GT_EQ", ">=")
   PLUS_ASSIGN     = Token.new("PLUS_ASSIGN", "+=")
   MINUS_ASSIGN    = Token.new("MINUS_ASSIGN", "-=")
   ASTERISK_ASSIGN = Token.new("ASTERISK_ASSIGN", "*=")
@@ -76,4 +79,5 @@ module Token
   IF       = Token.new("IF", "if")
   ELSE     = Token.new("ELSE", "else")
   RETURN   = Token.new("RETURN", "return")
+  FOR      = Token.new("FOR", "for")
 end

@@ -108,9 +108,23 @@ module Lexer
           token = new_token(Token::ASTERISK, @char)
         end
       when '<'
-        token = new_token(Token::LT, @char)
+        if peek_char() == '='
+          char = @char
+          read_char()
+          literal = char.to_s + @char.to_s
+          token = new_token(Token::LT_EQ, literal)
+        else
+          token = new_token(Token::LT, @char)
+        end
       when '>'
-        token = new_token(Token::GT, @char)
+        if peek_char() == '='
+          char = @char
+          read_char()
+          literal = char.to_s + @char.to_s
+          token = new_token(Token::GT_EQ, literal)
+        else
+          token = new_token(Token::GT, @char)
+        end
       when ';' # Delimiters
         token = new_token(Token::SEMICOLON, @char)
       when ':'
