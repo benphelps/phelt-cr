@@ -9,16 +9,16 @@ module Parser
   alias InfixParser = (AST::Expression) -> AST::Expression
 
   enum Precedences
-    Lowest      # none
-    Assignment  # =, +=, -=, etc
-    Equals      # ==
-    LessGreater # > or <
-    Sum         # +, -
-    Product     # *
-    Prefix      # -X or !X
-    Call        # myFunction(X)
-    Index       # array[index]
-    HashAccess  # hash.access
+    Lowest       # none
+    Assignment   # =, +=, -=, etc
+    Equals       # ==
+    LessGreater  # > or <
+    Sum          # +, -
+    Product      # *
+    Prefix       # -X or !X
+    Call         # myFunction(X)
+    Index        # array[index]
+    ObjectAccess # hash.access
   end
 
   class Parser
@@ -47,7 +47,7 @@ module Parser
       Token::ASTERISK.type        => Precedences::Product,
       Token::LPAREN.type          => Precedences::Call,
       Token::LBRACKET.type        => Precedences::Index,
-      Token::PERIOD.type          => Precedences::HashAccess,
+      Token::PERIOD.type          => Precedences::ObjectAccess,
     } of Token::Type => Precedences
 
     def initialize(@lexer : Lexer::Lexer)
@@ -66,7 +66,7 @@ module Parser
       register_parser_array_literal
       register_parser_array_index
       register_parser_hash_literal
-      register_parser_hash_access
+      register_parser_object_access
       register_parser_for_expression
 
       register_parser_call_expression
@@ -270,12 +270,12 @@ module Parser
       @prefix_parsers[Token::LBRACE.type] = parser
     end
 
-    def register_parser_hash_access
+    def register_parser_object_access
       parser = InfixParser.new do |left|
         token = @cur_token
         next_token
         index = AST::Identifier.new(@cur_token, @cur_token.literal)
-        AST::HashAccessExpression.new(token, left, index)
+        return AST::ObjectAccessExpression.new(token, left, index)
       end
       @infix_parsers[Token::PERIOD.type] = parser
     end

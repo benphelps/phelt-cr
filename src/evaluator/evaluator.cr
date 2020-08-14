@@ -16,8 +16,16 @@ module Evaluator
     TRUE  = PheltObject::Boolean.new(true)
     FALSE = PheltObject::Boolean.new(false)
 
+    @@external_env = File.read("./src/phelt/environment.ph")
+
     def initialize(@program, @env = PheltObject::Environment.new)
+      load_objects_env
       @current_block = @program.statements
+    end
+
+    def load_objects_env
+      parser = Parser::Parser.new(Lexer::Lexer.new(@@external_env))
+      eval(parser.parse_program, @env)
     end
 
     def eval
@@ -107,12 +115,12 @@ module Evaluator
         index = eval(node.index, env)
         return index if error?(index)
         return eval_index_expression(left, index)
-      when AST::HashAccessExpression
+      when AST::ObjectAccessExpression
+        @current_token = node.left.token
         left = eval(node.left, env)
         return left if error?(left)
         index = PheltObject::String.new(node.index.value)
-        return error("Object is not a hash") if !left.is_a? PheltObject::Hash
-        return eval_hash_access_expression(left.as(PheltObject::Hash), index)
+        return eval_object_access_expression(left, index, env)
       when AST::ForExpression
         return apply_for(node, env)
       else

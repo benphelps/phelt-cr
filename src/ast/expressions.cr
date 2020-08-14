@@ -173,7 +173,7 @@ module AST
     end
   end
 
-  class HashAccessExpression < Expression
+  class ObjectAccessExpression < Expression
     property token : Token::Token
     property left : Expression
     property index : Identifier
@@ -186,7 +186,7 @@ module AST
     end
 
     def string
-      "(#{left.string}[#{index.string}])"
+      "#{left.string}.#{index.string}"
     end
   end
 end
