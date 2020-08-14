@@ -37,7 +37,18 @@ module PheltObject
 
     def set(name : ::String, value : PheltObject::Object, const = false)
       @constants << name if const
-      @store[name] = value
+
+      outer = @outer
+      if !outer.nil?
+        if outer.store.has_key? name
+          outer.store[name] = value
+        else
+          @store[name] = value
+        end
+      else
+        @store[name] = value
+      end
+
       return value
     end
   end
