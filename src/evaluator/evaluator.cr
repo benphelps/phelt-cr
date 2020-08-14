@@ -226,6 +226,9 @@ module Evaluator
       if left.is_a? PheltObject::Array && index.is_a? PheltObject::Integer
         return eval_array_index_expression(left, index)
       end
+      if left.is_a? PheltObject::String && index.is_a? PheltObject::Integer
+        return eval_string_index_expression(left, index)
+      end
       if left.is_a? PheltObject::Hash && index.is_a? PheltObject::Hashable
         return eval_hash_index_expression(left, index)
       end
@@ -243,6 +246,17 @@ module Evaluator
       return array.elements[index]
     end
 
+    def eval_string_index_expression(string : PheltObject::String, index : PheltObject::Integer)
+      index = index.value
+      max = string.value.size - 1
+
+      if index < 0 || index > max
+        return NULL
+      end
+
+      return PheltObject::String.new(string.value[index].to_s)
+    end
+
     def eval_hash_index_expression(hash : PheltObject::Hash, index : PheltObject::Hashable)
       unless index.is_a? PheltObject::Hashable
         return error("Cannot use a #{index.type} as a hash key")
@@ -255,16 +269,38 @@ module Evaluator
       end
     end
 
-    def eval_hash_access_expression(hash : PheltObject::Hash, index : PheltObject::Hashable)
-      unless index.is_a? PheltObject::Hashable
-        return error("Cannot use a #{index.type} as a hash key")
-      end
-
-      if hash.pairs.has_key? index.hash_key
-        return hash.pairs[index.hash_key].value
+    def eval_object_access_expression(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment)
+      case object
+      when PheltObject::Hash
+        if object.pairs.has_key? index.hash_key
+          return object.pairs[index.hash_key].value
+        else
+          return NULL
+        end
+      when PheltObject::String
+        return object_access_function(object, index, env)
       else
-        return NULL
+        return error("Unhandled object access for #{object.type}")
       end
+    end
+
+    def object_access_function(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment)
+      object_internal = object.type.capitalize
+      object_methods = env.get(object_internal)
+      if object_methods.is_a? PheltObject::Hash
+        if object_methods.pairs.has_key? index.hash_key
+          accessed = object_methods.pairs[index.hash_key].value
+          if accessed.is_a? PheltObject::Function
+            return apply_function(accessed, [object], env)
+          else
+            return error("Object access is not a function.")
+          end
+          return
+        end
+      else
+        return error("#{object_internal} has no builtin functionality.")
+      end
+      return NULL
     end
 
     def eval_hash_literal(node : AST::HashLiteral, env : PheltObject::Environment)
