@@ -167,7 +167,7 @@ module Evaluator
     end
 
     def apply_do(body : AST::BlockStatement, env : PheltObject::Environment)
-      extended_env = PheltObject::Environment.new(env)
+      extended_env = PheltObject::Environment.new(env, scoped = true)
       evaluated = eval(body, extended_env)
       return unwrap_return_value(evaluated)
     end

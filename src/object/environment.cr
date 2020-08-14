@@ -3,8 +3,9 @@ module PheltObject
     property constants : ::Array(::String) = [] of ::String
     property store : ::Hash(::String, PheltObject::Object)
     property outer : PheltObject::Environment?
+    property scoped : Bool
 
-    def initialize(@outer = nil)
+    def initialize(@outer = nil, @scoped = false)
       @store = {} of ::String => PheltObject::Object
     end
 
@@ -38,15 +39,19 @@ module PheltObject
     def set(name : ::String, value : PheltObject::Object, const = false)
       @constants << name if const
 
-      outer = @outer
-      if !outer.nil?
-        if outer.store.has_key? name
-          outer.store[name] = value
+      if @scoped
+        @store[name] = value
+      else
+        outer = @outer
+        if !outer.nil?
+          if outer.store.has_key? name
+            outer.store[name] = value
+          else
+            @store[name] = value
+          end
         else
           @store[name] = value
         end
-      else
-        @store[name] = value
       end
 
       return value
