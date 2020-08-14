@@ -45,6 +45,7 @@ module Parser
       Token::MINUS.type           => Precedences::Sum,
       Token::SLASH.type           => Precedences::Product,
       Token::ASTERISK.type        => Precedences::Product,
+      Token::MODULUS.type         => Precedences::Product,
       Token::LPAREN.type          => Precedences::Call,
       Token::LBRACKET.type        => Precedences::Index,
       Token::PERIOD.type          => Precedences::ObjectAccess,
@@ -294,6 +295,7 @@ module Parser
       @infix_parsers[Token::MINUS.type] = parser
       @infix_parsers[Token::SLASH.type] = parser
       @infix_parsers[Token::ASTERISK.type] = parser
+      @infix_parsers[Token::MODULUS.type] = parser
       @infix_parsers[Token::EQ.type] = parser
       @infix_parsers[Token::NOT_EQ.type] = parser
       @infix_parsers[Token::LT.type] = parser

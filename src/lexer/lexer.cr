@@ -107,6 +107,8 @@ module Lexer
         else
           token = new_token(Token::ASTERISK, @char)
         end
+      when '%'
+        token = new_token(Token::MODULUS, @char)
       when '<'
         if peek_char() == '='
           char = @char

@@ -461,12 +461,19 @@ module Evaluator
         case operator
         when "+"
           value = left_val + right_val
+          value = value.to_i64 if value % 1 == 0
         when "-"
           value = left_val - right_val
+          value = value.to_i64 if value % 1 == 0
         when "*"
           value = left_val * right_val
+          value = value.to_i64 if value % 1 == 0
         when "/"
           value = left_val / right_val
+          value = value.to_i64 if value % 1 == 0
+        when "%"
+          value = left_val.to_f64 % right_val.to_f64
+          value = value.to_i64 if value % 1 == 0
         when "<"
           value = left_val < right_val
         when ">"

@@ -43,6 +43,7 @@ module Token
   MINUS           = Token.new("MINUS", "-")
   BANG            = Token.new("BANG", "!")
   ASTERISK        = Token.new("ASTERISK", "*")
+  MODULUS         = Token.new("MODULUS", "%")
   SLASH           = Token.new("SLASH", "/")
   LT              = Token.new("LT", "<")
   GT              = Token.new("GT", ">")
