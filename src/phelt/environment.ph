@@ -43,5 +43,29 @@ const Array = {
     },
     unshift: fn(self, item) {
         array_unshift(self, item)
+    },
+    map: fn(self, callback) {
+        let iter = fn(array, accumulated) {
+            if (object_length(array) == 0) {
+                accumulated
+            } else {
+                iter(array_rest(array), array_push(accumulated, callback(array_first(array))))
+            }
+        }
+        iter(self, [])
+    },
+    reduce: fn(self, initial, callback) {
+        let iter = fn(array, result) {
+            if (object_length(array) == 0) {
+                result
+            } else {
+                iter(array_rest(array), callback(result, array_first(array)));
+            }
+        }
+
+        iter(self, initial);
+    },
+    sum: fn(self) {
+        Array["reduce"](self, 0, fn(i, e) { i + e })
     }
 }
