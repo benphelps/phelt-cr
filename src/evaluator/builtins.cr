@@ -43,6 +43,12 @@ module Evaluator
     end
   end
 
+  define_builtin("print") do
+    args.each do |value|
+      STDOUT.print value.inspect
+    end
+  end
+
   define_builtin("eval", 1, PheltObject::String) do
     parser = Parser::Parser.new(Lexer::Lexer.new(string.value))
     evaluator = ::Evaluator::Evaluator.new(parser.parse_program, env)
