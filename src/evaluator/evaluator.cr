@@ -143,6 +143,8 @@ module Evaluator
         return eval_object_access_expression(left, index, env, args)
       when AST::ForExpression
         return apply_for(node, env)
+      when AST::BreakStatement
+        return PheltObject::Break.new
       else
         return NULL
       end
@@ -203,6 +205,11 @@ module Evaluator
         end
         evaluated = eval(node.statement, extended_env)
         return evaluated if error?(evaluated)
+
+        if evaluated.is_a? PheltObject::Break
+          break
+        end
+
         final = eval(node.final, extended_env)
         return final if error?(final)
       end

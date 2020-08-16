@@ -51,6 +51,21 @@ module AST
     end
   end
 
+  class BreakStatement < Statement
+    property token : Token::Token
+
+    def initialize(@token)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "break;"
+    end
+  end
+
   class ExpressionStatement < Statement
     property token : Token::Token
     property expression : Expression

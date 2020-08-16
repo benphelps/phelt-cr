@@ -2,7 +2,7 @@ require "../ast"
 
 module PheltObject
   alias Number = Integer | Float
-  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin | Array | Hash
+  alias Object = Integer | Float | Boolean | Error | Null | Return | Function | String | Builtin | Array | Hash | Break
   alias Hashable = Integer | String
 
   class Integer
@@ -165,6 +165,21 @@ module PheltObject
 
     def inspect
       @value.inspect
+    end
+  end
+
+  class Break
+    TYPE = "break"
+
+    def initialize
+    end
+
+    def type
+      TYPE
+    end
+
+    def inspect
+      "break"
     end
   end
 

@@ -100,6 +100,8 @@ module Parser
         return parse_const_statement()
       when Token::RETURN.type
         return parse_return_statement()
+      when Token::BREAK.type
+        return parse_break_statement()
       else
         return parse_expression_statement()
       end
@@ -611,6 +613,16 @@ module Parser
       end
 
       return AST::ReturnStatement.new(token, return_value)
+    end
+
+    def parse_break_statement
+      token = @cur_token
+
+      if peek_token_is?(Token::SEMICOLON)
+        next_token
+      end
+
+      return AST::BreakStatement.new(token)
     end
 
     def cur_token_is?(token : Token::Token)
