@@ -199,7 +199,7 @@ describe "Evaluator" do
 
   it "should evaluate for loops" do
     tests = [
-      {input: "let array = []; for(let i = 1; i <= 10; i += 1) { push(array, i) } array", expected: "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"},
+      {input: "let array = []; for(let i = 1; i <= 10; i += 1) { array_push(array, i) } array", expected: "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"},
     ]
 
     tests.each do |test|

@@ -43,17 +43,17 @@ module Evaluator
     end
   end
 
-  define_builtin("inspect", 1) do
-    return PheltObject::String.new(first.inspect.to_s)
-  end
-
   define_builtin("eval", 1, PheltObject::String) do
     parser = Parser::Parser.new(Lexer::Lexer.new(string.value))
     evaluator = ::Evaluator::Evaluator.new(parser.parse_program, env)
     return evaluator.eval
   end
 
-  define_builtin("len", 1) do
+  define_builtin("inspect", 1) do
+    return PheltObject::String.new(first.inspect.to_s)
+  end
+
+  define_builtin("__len", 1) do
     case first
     when PheltObject::String
       return PheltObject::Integer.new(first.value.size.to_i64)
@@ -64,34 +64,34 @@ module Evaluator
     end
   end
 
-  define_builtin("first", 1, PheltObject::Array) do
+  define_builtin("array_first", 1, PheltObject::Array) do
     return array.elements[0] if array.elements.size > 0
   end
 
-  define_builtin("last", 1, PheltObject::Array) do
+  define_builtin("array_last", 1, PheltObject::Array) do
     return array.elements[array.elements.size - 1] if array.elements.size > 0
   end
 
-  define_builtin("rest", 1, PheltObject::Array) do
+  define_builtin("array_rest", 1, PheltObject::Array) do
     return PheltObject::Array.new(array.elements[1..]) if array.elements.size > 0
   end
 
-  define_builtin("push", 2, PheltObject::Array) do
+  define_builtin("array_push", 2, PheltObject::Array) do
     array.elements.push(second.as(PheltObject::Object))
     return array
   end
 
-  define_builtin("pop", 1, PheltObject::Array) do
+  define_builtin("array_pop", 1, PheltObject::Array) do
     popped = array.elements.pop
     return popped
   end
 
-  define_builtin("shift", 1, PheltObject::Array) do
+  define_builtin("array_shift", 1, PheltObject::Array) do
     shifted = array.elements.shift
     return shifted
   end
 
-  define_builtin("unshift", 2, PheltObject::Array) do
+  define_builtin("array_unshift", 2, PheltObject::Array) do
     array.elements.unshift(second.as(PheltObject::Object))
     return array
   end
