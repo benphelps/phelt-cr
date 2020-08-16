@@ -263,15 +263,15 @@ describe "Evaluator" do
 
   it "should evaluate builtin function calls" do
     tests = [
-      {input: "len(\"\")", expected: 0},
-      {input: "len(\"four\")", expected: 4},
-      {input: "len(\"hello world\")", expected: 11},
-      {input: "len([])", expected: 0},
-      {input: "len([1,2,3,4,5])", expected: 5},
+      {input: "object_length(\"\")", expected: 0},
+      {input: "object_length(\"four\")", expected: 4},
+      {input: "object_length(\"hello world\")", expected: 11},
+      {input: "object_length([])", expected: 0},
+      {input: "object_length([1,2,3,4,5])", expected: 5},
       {input: "first([])", expected: nil},
       {input: "first([1,2,3,4,5])", expected: 1},
-      {input: "len(1)", expected: "First argument to `len` not supported, got number"},
-      {input: "len(\"one\", \"two\");", expected: "Wrong number of arguments, got 2, expected 1"},
+      {input: "object_length(1)", expected: "First argument to `object_length` not supported, got number"},
+      {input: "object_length(\"one\", \"two\");", expected: "Wrong number of arguments, got 2, expected 1"},
     ]
 
     tests.each do |test|

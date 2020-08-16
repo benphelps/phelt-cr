@@ -53,14 +53,14 @@ module Evaluator
     return PheltObject::String.new(first.inspect.to_s)
   end
 
-  define_builtin("__len", 1) do
+  define_builtin("object_length", 1) do
     case first
     when PheltObject::String
       return PheltObject::Integer.new(first.value.size.to_i64)
     when PheltObject::Array
       return PheltObject::Integer.new(first.elements.size.to_i64)
     else
-      return PheltObject::Error.new("First argument to `len` not supported, got #{first.type}", "", 0, 0)
+      return PheltObject::Error.new("First argument to `object_length` not supported, got #{first.type}", "", 0, 0)
     end
   end
 
