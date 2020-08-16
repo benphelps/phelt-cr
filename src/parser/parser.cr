@@ -31,6 +31,7 @@ module Parser
     @infix_parsers = {} of Token::Type => InfixParser
 
     @precedences = {
+      Token::ASSIGN.type          => Precedences::Assignment,
       Token::PLUS_ASSIGN.type     => Precedences::Assignment,
       Token::MINUS_ASSIGN.type    => Precedences::Assignment,
       Token::SLASH_ASSIGN.type    => Precedences::Assignment,
@@ -326,6 +327,7 @@ module Parser
         AST::AssignmentInfixExpression.new(token, operator, left, right)
       end
 
+      @infix_parsers[Token::ASSIGN.type] = parser
       @infix_parsers[Token::PLUS_ASSIGN.type] = parser
       @infix_parsers[Token::MINUS_ASSIGN.type] = parser
       @infix_parsers[Token::SLASH_ASSIGN.type] = parser

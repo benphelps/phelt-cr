@@ -507,6 +507,10 @@ module Evaluator
         return eval_string_assignment_infix_expression(operator, left, right, env)
       end
 
+      if left.is_a?(AST::Expression) && right.is_a?(PheltObject::Object)
+        return eval_assignment_infix_expression(operator, left, right, env)
+      end
+
       return error("Unkown assignment operator #{operator}")
     end
 
@@ -587,6 +591,29 @@ module Evaluator
 
           return value
         end
+      end
+      return error("Unkown assignment operator for #{left.class} #{operator} #{right.type}")
+    end
+
+    def eval_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Object, env : PheltObject::Environment)
+      if left.is_a?(AST::Identifier) && right.is_a?(PheltObject::Object)
+        if !env.exists?(left.value)
+          @current_token = left.token
+          return error("Undefined identifier #{left.value}")
+        end
+
+        left_obj = env.get(left.value)
+
+        case operator
+        when "="
+          value = right
+        else
+          return error("Unkown assignment operator #{operator} for #{left_obj.type}")
+        end
+
+        env.set(left.value, value)
+
+        return value
       end
       return error("Unkown assignment operator for #{left.class} #{operator} #{right.type}")
     end
