@@ -139,6 +139,23 @@ module AST
     end
   end
 
+  class WhileExpression < Expression
+    property token : Token::Token
+    property condition : Expression
+    property statement : BlockStatement
+
+    def initialize(@token, @condition, @statement)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "while (#{@condition.string} #{@statement.string}"
+    end
+  end
+
   class CallExpression < Expression
     property token : Token::Token
     property function : Expression

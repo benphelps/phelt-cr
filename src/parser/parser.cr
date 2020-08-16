@@ -69,6 +69,7 @@ module Parser
       register_parser_hash_literal
       register_parser_object_access
       register_parser_for_expression
+      register_parser_while_expression
 
       register_parser_call_expression
 
@@ -435,6 +436,36 @@ module Parser
       end
 
       @prefix_parsers[Token::FOR.type] = parser
+    end
+
+    def register_parser_while_expression
+      parser = PrefixParser.new do
+        token = @cur_token
+
+        if !expect_peek(Token::LPAREN)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        next_token
+
+        condition = parse_expression(Precedences::Lowest)
+
+        if !expect_peek(Token::RPAREN)
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
+        end
+
+        next_token
+
+        statement = parse_block_statement()
+
+        AST::WhileExpression.new(
+          token,
+          condition,
+          statement
+        )
+      end
+
+      @prefix_parsers[Token::WHILE.type] = parser
     end
 
     def register_parser_function_literal

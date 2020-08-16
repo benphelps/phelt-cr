@@ -107,7 +107,7 @@ module Evaluator
         return PheltObject::Function.new(params, body, env)
       when AST::DoLiteral
         body = node.body
-        return apply_do(body, env)
+        return eval_do(body, env)
       when AST::CallExpression
         function = eval(node.function, env)
         return function if error?(function)
@@ -142,7 +142,9 @@ module Evaluator
         return args[0] if args.size == 1 && error?(args[0])
         return eval_object_access_expression(left, index, env, args)
       when AST::ForExpression
-        return apply_for(node, env)
+        return eval_for(node, env)
+      when AST::WhileExpression
+        return eval_while(node, env)
       when AST::BreakStatement
         return PheltObject::Break.new
       else
@@ -188,13 +190,13 @@ module Evaluator
       end
     end
 
-    def apply_do(body : AST::BlockStatement, env : PheltObject::Environment)
+    def eval_do(body : AST::BlockStatement, env : PheltObject::Environment)
       extended_env = PheltObject::Environment.new(env, scoped = true)
       evaluated = eval(body, extended_env)
       return unwrap_return_value(evaluated)
     end
 
-    def apply_for(node : AST::ForExpression, env : PheltObject::Environment)
+    def eval_for(node : AST::ForExpression, env : PheltObject::Environment)
       extended_env = PheltObject::Environment.new(env)
       initial = eval(node.initial, extended_env)
 
@@ -212,6 +214,25 @@ module Evaluator
 
         final = eval(node.final, extended_env)
         return final if error?(final)
+      end
+
+      return NULL
+    end
+
+    def eval_while(node : AST::WhileExpression, env : PheltObject::Environment)
+      extended_env = PheltObject::Environment.new(env)
+
+      loop do
+        condition = eval(node.condition, extended_env)
+        if condition == FALSE
+          break
+        end
+
+        evaluated = eval(node.statement, extended_env)
+        return evaluated if error?(evaluated)
+        if evaluated.is_a? PheltObject::Break
+          break
+        end
       end
 
       return NULL

@@ -19,6 +19,7 @@ module Token
     "return" => RETURN,
     "do"     => DO,
     "for"    => FOR,
+    "while"  => WHILE,
     "break"  => BREAK,
   } of String => Token
 
@@ -82,5 +83,6 @@ module Token
   ELSE     = Token.new("ELSE", "else")
   RETURN   = Token.new("RETURN", "return")
   FOR      = Token.new("FOR", "for")
+  WHILE    = Token.new("WHILE", "while")
   BREAK    = Token.new("BREAK", "break")
 end
