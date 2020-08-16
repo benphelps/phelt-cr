@@ -133,6 +133,14 @@ module Evaluator
         return left if error?(left)
         index = PheltObject::String.new(node.index.value)
         return eval_object_access_expression(left, index, env)
+      when AST::ObjectCallExpression
+        @current_token = node.left.token
+        left = eval(node.left, env)
+        return left if error?(left)
+        index = PheltObject::String.new(node.index.value)
+        args = eval_expressions(node.arguments, env)
+        return args[0] if args.size == 1 && error?(args[0])
+        return eval_object_access_expression(left, index, env, args)
       when AST::ForExpression
         return apply_for(node, env)
       else
@@ -289,7 +297,7 @@ module Evaluator
       end
     end
 
-    def eval_object_access_expression(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment)
+    def eval_object_access_expression(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment, args : Array(PheltObject::Object)? = nil)
       case object
       when PheltObject::Hash
         if object.pairs.has_key? index.hash_key
@@ -298,20 +306,29 @@ module Evaluator
           return NULL
         end
       when PheltObject::String
-        return object_access_function(object, index, env)
+        return object_access_function(object, index, env, args)
+      when PheltObject::Number
+        return object_access_function(object, index, env, args)
+      when PheltObject::Array
+        return object_access_function(object, index, env, args)
       else
         return error("Unhandled object access for #{object.type}")
       end
     end
 
-    def object_access_function(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment)
+    def object_access_function(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment, args : Array(PheltObject::Object)?)
+      if args.nil?
+        args = [object] of PheltObject::Object
+      else
+        args.unshift object
+      end
       object_internal = object.type.capitalize
       object_methods = env.get(object_internal)
       if object_methods.is_a? PheltObject::Hash
         if object_methods.pairs.has_key? index.hash_key
           accessed = object_methods.pairs[index.hash_key].value
           if accessed.is_a? PheltObject::Function
-            return apply_function(accessed, [object], env)
+            return apply_function(accessed, args, env)
           else
             return error("Object access is not a function.")
           end

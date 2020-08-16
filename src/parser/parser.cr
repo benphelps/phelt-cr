@@ -274,9 +274,18 @@ module Parser
     def register_parser_object_access
       parser = InfixParser.new do |left|
         token = @cur_token
+
         next_token
         index = AST::Identifier.new(@cur_token, @cur_token.literal)
-        return AST::ObjectAccessExpression.new(token, left, index)
+
+        if !peek_token_is?(Token::LPAREN)
+          return AST::ObjectAccessExpression.new(token, left, index)
+        end
+
+        next_token
+
+        params = parse_expression_list(Token::RPAREN)
+        return AST::ObjectCallExpression.new(token, left, index, params)
       end
       @infix_parsers[Token::PERIOD.type] = parser
     end

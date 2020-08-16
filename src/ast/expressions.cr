@@ -189,4 +189,22 @@ module AST
       "#{left.string}.#{index.string}"
     end
   end
+
+  class ObjectCallExpression < Expression
+    property token : Token::Token
+    property left : Expression
+    property index : Identifier
+    property arguments : Array(Expression)
+
+    def initialize(@token, @left, @index, @arguments)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "#{left.string}.#{index.string}(#{arguments.join(", ", &.string)})"
+    end
+  end
 end
