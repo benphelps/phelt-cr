@@ -268,8 +268,8 @@ describe "Evaluator" do
       {input: "object_length(\"hello world\")", expected: 11},
       {input: "object_length([])", expected: 0},
       {input: "object_length([1,2,3,4,5])", expected: 5},
-      {input: "first([])", expected: nil},
-      {input: "first([1,2,3,4,5])", expected: 1},
+      {input: "array_first([])", expected: nil},
+      {input: "array_first([1,2,3,4,5])", expected: 1},
       {input: "object_length(1)", expected: "First argument to `object_length` not supported, got number"},
       {input: "object_length(\"one\", \"two\");", expected: "Wrong number of arguments, got 2, expected 1"},
     ]
