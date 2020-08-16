@@ -1,5 +1,6 @@
 module PheltObject
   class Environment
+    property external_loaded : Bool = false
     property constants : ::Array(::String) = [] of ::String
     property store : ::Hash(::String, PheltObject::Object)
     property outer : PheltObject::Environment?

@@ -24,8 +24,20 @@ module Evaluator
     end
 
     def load_objects_env
-      parser = Parser::Parser.new(Lexer::Lexer.new(@@external_env))
-      eval(parser.parse_program, @env)
+      if @env.external_loaded == false
+        parser = Parser::Parser.new(Lexer::Lexer.new(@@external_env))
+        program = parser.parse_program
+        if (parser.errors.size > 0)
+          debug!(parser.errors)
+          exit(1)
+        end
+        result = eval(program, @env)
+        if error?(result)
+          debug!(result)
+          exit(1)
+        end
+        @env.external_loaded = true
+      end
     end
 
     def eval
