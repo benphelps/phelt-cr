@@ -508,7 +508,7 @@ module Evaluator
       end
 
       if left.is_a?(AST::Expression) && right.is_a?(PheltObject::Object)
-        return eval_assignment_infix_expression(operator, left, right, env)
+        return eval_broad_assignment_infix_expression(operator, left, right, env)
       end
 
       return error("Unkown assignment operator #{operator}")
@@ -572,6 +572,8 @@ module Evaluator
           right_val = right.value
 
           case operator
+          when "="
+            value = right_val
           when "+="
             value = left_val + right_val
           when "-="
@@ -595,7 +597,7 @@ module Evaluator
       return error("Unkown assignment operator for #{left.class} #{operator} #{right.type}")
     end
 
-    def eval_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Object, env : PheltObject::Environment)
+    def eval_broad_assignment_infix_expression(operator : String, left : AST::Expression, right : PheltObject::Object, env : PheltObject::Environment)
       if left.is_a?(AST::Identifier) && right.is_a?(PheltObject::Object)
         if !env.exists?(left.value)
           @current_token = left.token
