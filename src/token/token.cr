@@ -55,6 +55,8 @@ module Token
   MINUS_ASSIGN    = Token.new("MINUS_ASSIGN", "-=")
   ASTERISK_ASSIGN = Token.new("ASTERISK_ASSIGN", "*=")
   SLASH_ASSIGN    = Token.new("SLASH_ASSIGN", "/=")
+  DECREMENT       = Token.new("DECREMENT", "--")
+  INCREMENT       = Token.new("INCREMENT", "++")
 
   # Comparators
   EQ     = Token.new("EQ", "==")

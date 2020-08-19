@@ -31,6 +31,8 @@ module Parser
     @infix_parsers = {} of Token::Type => InfixParser
 
     @precedences = {
+      Token::DECREMENT.type       => Precedences::Assignment,
+      Token::INCREMENT.type       => Precedences::Assignment,
       Token::ASSIGN.type          => Precedences::Assignment,
       Token::PLUS_ASSIGN.type     => Precedences::Assignment,
       Token::MINUS_ASSIGN.type    => Precedences::Assignment,
@@ -61,6 +63,7 @@ module Parser
       register_parser_prefix_expression
       register_parser_infix_expression
       register_parser_assignment_infix_expression
+      register_parser_indecrement_expression
       register_parser_grouped_expression
       register_parser_if_expression
       register_parser_function_literal
@@ -154,7 +157,8 @@ module Parser
           right
         )
       end
-
+      @prefix_parsers[Token::DECREMENT.type] = parser
+      @prefix_parsers[Token::INCREMENT.type] = parser
       @prefix_parsers[Token::BANG.type] = parser
       @prefix_parsers[Token::MINUS.type] = parser
     end
@@ -332,6 +336,19 @@ module Parser
       @infix_parsers[Token::MINUS_ASSIGN.type] = parser
       @infix_parsers[Token::SLASH_ASSIGN.type] = parser
       @infix_parsers[Token::ASTERISK_ASSIGN.type] = parser
+    end
+
+    def register_parser_indecrement_expression
+      parser = InfixParser.new do |left|
+        token = @cur_token
+        operator = @cur_token.literal
+        precedence = cur_precedence
+        next_token
+        AST::InDecrementExpression.new(token, operator, left)
+      end
+
+      @infix_parsers[Token::DECREMENT.type] = parser
+      @infix_parsers[Token::INCREMENT.type] = parser
     end
 
     def register_parser_grouped_expression

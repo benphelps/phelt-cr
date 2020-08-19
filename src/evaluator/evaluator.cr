@@ -51,6 +51,10 @@ module Evaluator
       when AST::ExpressionStatement
         @current_token = node.token
         return eval(node.expression, env)
+      when AST::BlockStatement
+        return eval_block_statement(node, env)
+      when AST::BreakStatement
+        return PheltObject::Break.new
       when AST::IntegerLiteral
         return PheltObject::Integer.new(node.value)
       when AST::FloatLiteral
@@ -64,7 +68,7 @@ module Evaluator
         @current_token = node.right.token
         right = eval(node.right, env)
         return right if error?(right)
-        return eval_prefix_expression(node.operator, right)
+        return eval_prefix_expression(node, right, env)
       when AST::InfixExpression
         @current_token = node.left.token
         left = eval(node.left, env)
@@ -79,8 +83,9 @@ module Evaluator
         right = eval(node.right, env)
         return right if error?(right)
         return eval_assignment_infix_expression(node.operator, left, right, env)
-      when AST::BlockStatement
-        return eval_block_statement(node, env)
+      when AST::InDecrementExpression
+        left = node.left
+        return eval_indecrement_infix_expression(node.operator, left, env)
       when AST::IfExpression
         @current_token = node.condition.token
         return eval_if_expression(node, env)
@@ -145,8 +150,6 @@ module Evaluator
         return eval_for(node, env)
       when AST::WhileExpression
         return eval_while(node, env)
-      when AST::BreakStatement
-        return PheltObject::Break.new
       else
         return NULL
       end
@@ -444,12 +447,16 @@ module Evaluator
       result
     end
 
-    def eval_prefix_expression(operator : String, right : PheltObject::Object)
-      case operator
+    def eval_prefix_expression(node : AST::PrefixExpression, right : PheltObject::Object, env : PheltObject::Environment)
+      case node.operator
       when "!"
         return eval_bang_operator_expression(right)
       when "-"
         return eval_minus_prefix_operator_expression(right)
+      when "--"
+        return eval_indecrement_prefix_operator_expression(node, right, env)
+      when "++"
+        return eval_indecrement_prefix_operator_expression(node, right, env)
       else
         return NULL
       end
@@ -472,6 +479,42 @@ module Evaluator
       return PheltObject::Integer.new(-right.value) if right.is_a? PheltObject::Integer
       return PheltObject::Float.new(-right.value) if right.is_a? PheltObject::Float
       return error("Unkown operator -#{right.type}")
+    end
+
+    def eval_indecrement_prefix_operator_expression(node : AST::PrefixExpression, right : PheltObject::Object, env : PheltObject::Environment)
+      right = node.right
+
+      if right.is_a? AST::Identifier
+        @current_token = right.token
+        if !env.exists?(right.value)
+          return error("Undefined identifier #{right.value}")
+        end
+        right_obj = env.get(right.value)
+      else
+        right_obj = eval(right, env)
+      end
+
+      if right_obj.is_a? PheltObject::Number
+        case node.operator
+        when "++"
+          value = right_obj.value + 1
+        when "--"
+          value = right_obj.value - 1
+        else
+          value = right_obj.value
+        end
+
+        value = PheltObject::Integer.new(value) if value.is_a? Int
+        value = PheltObject::Float.new(value) if value.is_a? Float
+
+        if right.is_a? AST::Identifier
+          env.set(right.value, value)
+        end
+
+        return value
+      end
+
+      return error("Unkown indecrement prefix operator #{node.operator}.")
     end
 
     def eval_infix_expression(operator : String, left : PheltObject::Object, right : PheltObject::Object)
@@ -512,6 +555,43 @@ module Evaluator
       end
 
       return error("Unkown assignment operator #{operator}")
+    end
+
+    def eval_indecrement_infix_expression(operator : String, left : AST::Expression, env : PheltObject::Environment)
+      if left.is_a? AST::Identifier
+        @current_token = left.token
+        if !env.exists?(left.value)
+          return error("Undefined identifier #{left.value}")
+        end
+        left_obj = env.get(left.value)
+      else
+        left_obj = eval(left, env)
+      end
+
+      if left_obj.is_a?(PheltObject::Number)
+        left_val = left_obj.value
+
+        case operator
+        when "++"
+          value = left_val + 1
+        when "--"
+          value = left_val - 1
+        else
+          value = left_val
+        end
+
+        value = PheltObject::Integer.new(value.to_i64) if value.is_a? Int
+        value = PheltObject::Float.new(value.to_f64) if value.is_a? Float
+
+        if left.is_a? AST::Identifier
+          env.set(left.value, value)
+        end
+
+        return PheltObject::Integer.new(left_val.to_i64) if left_val.is_a? Int
+        return PheltObject::Float.new(left_val.to_f64) if left_val.is_a? Float
+      end
+
+      return error("Unkown indecrement infix operator #{operator}")
     end
 
     def eval_number_infix_expression(operator : String, left : PheltObject::Number, right : PheltObject::Number)

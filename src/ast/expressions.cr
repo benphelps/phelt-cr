@@ -98,6 +98,23 @@ module AST
     end
   end
 
+  class InDecrementExpression < Expression
+    property token : Token::Token
+    property operator : String
+    property left : Expression
+
+    def initialize(@token, @operator, @left)
+    end
+
+    def token_literal
+      @token.literal
+    end
+
+    def string
+      "(#{left.string}#{@operator})"
+    end
+  end
+
   class IfExpression < Expression
     property token : Token::Token
     property condition : Expression

@@ -55,98 +55,78 @@ module Lexer
       case @char
       when '=' # Operators
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::EQ, literal)
+          token = new_multi_token(Token::EQ)
         else
-          token = new_token(Token::ASSIGN, @char)
+          token = new_token(Token::ASSIGN)
         end
       when '+'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::PLUS_ASSIGN, literal)
+          token = new_multi_token(Token::PLUS_ASSIGN)
+        elsif peek_char() == '+'
+          token = new_multi_token(Token::INCREMENT)
         else
-          token = new_token(Token::PLUS, @char)
+          token = new_token(Token::PLUS)
         end
       when '-'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::MINUS_ASSIGN, literal)
+          token = new_multi_token(Token::MINUS_ASSIGN)
+        elsif peek_char() == '-'
+          token = new_multi_token(Token::DECREMENT)
         else
-          token = new_token(Token::MINUS, @char)
+          token = new_token(Token::MINUS)
         end
       when '!'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::NOT_EQ, literal)
+          token = new_multi_token(Token::NOT_EQ)
         else
-          token = new_token(Token::BANG, @char)
+          token = new_token(Token::BANG)
         end
       when '/'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::SLASH_ASSIGN, literal)
+          token = new_multi_token(Token::SLASH_ASSIGN)
         else
-          token = new_token(Token::SLASH, @char)
+          token = new_token(Token::SLASH)
         end
       when '*'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::ASTERISK_ASSIGN, literal)
+          token = new_multi_token(Token::ASTERISK_ASSIGN)
         else
-          token = new_token(Token::ASTERISK, @char)
+          token = new_token(Token::ASTERISK)
         end
       when '%'
-        token = new_token(Token::MODULUS, @char)
+        token = new_token(Token::MODULUS)
       when '<'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::LT_EQ, literal)
+          token = new_multi_token(Token::LT_EQ)
         else
-          token = new_token(Token::LT, @char)
+          token = new_token(Token::LT)
         end
       when '>'
         if peek_char() == '='
-          char = @char
-          read_char()
-          literal = char.to_s + @char.to_s
-          token = new_token(Token::GT_EQ, literal)
+          token = new_multi_token(Token::GT_EQ)
         else
-          token = new_token(Token::GT, @char)
+          token = new_token(Token::GT)
         end
       when ';' # Delimiters
-        token = new_token(Token::SEMICOLON, @char)
+        token = new_token(Token::SEMICOLON)
       when ':'
-        token = new_token(Token::COLON, @char)
+        token = new_token(Token::COLON)
       when '.'
-        token = new_token(Token::PERIOD, @char)
+        token = new_token(Token::PERIOD)
       when ','
-        token = new_token(Token::COMMA, @char)
+        token = new_token(Token::COMMA)
       when '('
-        token = new_token(Token::LPAREN, @char)
+        token = new_token(Token::LPAREN)
       when ')'
-        token = new_token(Token::RPAREN, @char)
+        token = new_token(Token::RPAREN)
       when '{'
-        token = new_token(Token::LBRACE, @char)
+        token = new_token(Token::LBRACE)
       when '}'
-        token = new_token(Token::RBRACE, @char)
+        token = new_token(Token::RBRACE)
       when '['
-        token = new_token(Token::LBRACKET, @char)
+        token = new_token(Token::LBRACKET)
       when ']'
-        token = new_token(Token::RBRACKET, @char)
+        token = new_token(Token::RBRACKET)
       when '"'
         literal = read_string()
         token = new_token(Token::STRING, literal)
@@ -166,7 +146,7 @@ module Lexer
           token = new_token(Token::INT, literal)
           return token
         end
-        token = new_token(Token::ILLEGAL, @char)
+        token = new_token(Token::ILLEGAL)
       end
 
       if token.type != Token::EOF.type
@@ -209,6 +189,17 @@ module Lexer
       while @char.whitespace?
         read_char()
       end
+    end
+
+    def new_multi_token(token : Token::Token)
+      char = @char
+      read_char()
+      literal = char.to_s + @char.to_s
+      new_token(token, literal)
+    end
+
+    def new_token(token : Token::Token)
+      Token::Token.new(token.type, @char.to_s, @token_line, @token_column)
     end
 
     def new_token(token : Token::Token, literal : String | Char)
