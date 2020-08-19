@@ -16,7 +16,7 @@ module Evaluator
     TRUE  = PheltObject::Boolean.new(true)
     FALSE = PheltObject::Boolean.new(false)
 
-    @@external_env = File.read("./src/phelt/environment.ph")
+    @@stdlib = File.read("./src/phelt/stdlib.ph")
 
     def initialize(@program, @env = PheltObject::Environment.new)
       load_objects_env
@@ -25,7 +25,7 @@ module Evaluator
 
     def load_objects_env
       if @env.external_loaded == false
-        parser = Parser::Parser.new(Lexer::Lexer.new(@@external_env))
+        parser = Parser::Parser.new(Lexer::Lexer.new(@@stdlib))
         program = parser.parse_program
         if (parser.errors.size > 0)
           debug!(parser.errors)
