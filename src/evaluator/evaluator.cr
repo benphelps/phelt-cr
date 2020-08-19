@@ -95,6 +95,7 @@ module Evaluator
         return value if error?(value)
         return PheltObject::Return.new(value)
       when AST::LetStatement
+        @current_token = node.token
         value = eval(node.value, env)
         return value if error?(value)
         return error("Cannot redefine constant #{node.name.value}") if env.constant?(node.name.value)
@@ -266,6 +267,7 @@ module Evaluator
           return ::Evaluator::BUILTINS[node.value]
         end
       end
+      @current_token = node.token
       return error("Undefined identifier #{node.value}")
     end
 
@@ -355,20 +357,30 @@ module Evaluator
       end
       object_internal = object.type.capitalize
       object_methods = env.get(object_internal)
+      global_methods = env.get("Object")
       if object_methods.is_a? PheltObject::Hash
         if object_methods.pairs.has_key? index.hash_key
           accessed = object_methods.pairs[index.hash_key].value
           if accessed.is_a? PheltObject::Function
             return apply_function(accessed, args, env)
-          else
-            return error("Object access is not a function.")
           end
-          return
+        elsif global_methods.is_a? PheltObject::Hash
+          if global_methods.pairs.has_key? index.hash_key
+            accessed = global_methods.pairs[index.hash_key].value
+            if accessed.is_a? PheltObject::Function
+              return apply_function(accessed, args, env)
+            end
+          end
         end
-      else
-        return error("#{object_internal} has no builtin functionality.")
+      elsif global_methods.is_a? PheltObject::Hash
+        if global_methods.pairs.has_key? index.hash_key
+          accessed = global_methods.pairs[index.hash_key].value
+          if accessed.is_a? PheltObject::Function
+            return apply_function(accessed, args, env)
+          end
+        end
       end
-      return NULL
+      return error("Undefined function '#{index.value}' for #{object_internal}.")
     end
 
     def eval_hash_literal(node : AST::HashLiteral, env : PheltObject::Environment)

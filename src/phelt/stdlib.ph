@@ -1,6 +1,12 @@
+const Object = {
+    type: fn(self) {
+        object_type(self)
+    }
+}
+
 const String = {
     length: fn(self) {
-        len(self)
+        object_length(self)
     },
     reverse: fn(self) {
         let result = ""
@@ -23,6 +29,9 @@ const Number = {
 }
 
 const Array = {
+    length: fn(self) {
+        object_length(self)
+    },
     first: fn(self) {
         array_first(self)
     },

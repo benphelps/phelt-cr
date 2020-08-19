@@ -59,6 +59,10 @@ module Evaluator
     return PheltObject::String.new(first.inspect.to_s)
   end
 
+  define_builtin("object_type", 1) do
+    return PheltObject::String.new(first.type)
+  end
+
   define_builtin("object_length", 1) do
     case first
     when PheltObject::String
