@@ -125,7 +125,7 @@ module Parser
 
     def parse_expression(precedence : Precedences)
       if !@prefix_parsers.has_key?(@cur_token.type)
-        @errors << "no prefix parser for [#{@cur_token.type} #{@cur_token.literal}]"
+        @errors << "Unexpected #{@cur_token.type}"
         return AST::EmptyExpression.new
       end
       prefix = @prefix_parsers[@cur_token.type]
@@ -693,7 +693,7 @@ module Parser
     end
 
     def peek_error(token : Token::Token)
-      @errors << "expected next token to be #{token.type}, got #{@peek_token.type} instead"
+      @errors << "Expected next token to be #{token.type}, got #{@peek_token.type} instead"
     end
 
     def peek_precedence
