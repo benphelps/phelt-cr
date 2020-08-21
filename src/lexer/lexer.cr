@@ -208,7 +208,7 @@ module Lexer
   end
 
   def self.is_letter?(char)
-    char.letter? || char == '_'
+    char.letter? || char == '_' || char == '?' || char == '!'
   end
 
   def self.is_number?(char)
