@@ -15,7 +15,7 @@ module AST
 
   class ErrorExpression < Expression
     property token : Token::Token
-    property error : String
+    property error : Tuple(Token::Token, String)
 
     def initialize(@token, @error)
     end

@@ -18,7 +18,9 @@ module Interpreter
       program = parser.parse_program
 
       if parser.errors.size > 0
-        STDOUT.puts parser.errors.join("\n")
+        parser.errors.each do |error|
+          STDERR.puts parser.formatted_error(error)
+        end
         return 1
       end
 

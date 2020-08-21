@@ -22,8 +22,9 @@ module REPL
         program = parser.parse_program
 
         if parser.errors.size > 0
-          STDERR.print ::REPL::PROMPT.colorize(:red)
-          STDERR.puts parser.errors.join(", ")
+          parser.errors.each do |error|
+            STDERR.puts parser.formatted_error(error)
+          end
         else
           evaluator = Evaluator::Evaluator.new(program, env).eval
           STDOUT.puts evaluator.inspect
@@ -46,8 +47,9 @@ module REPL
         program = parser.parse_program
 
         if parser.errors.size > 0
-          STDERR.print ::REPL::PROMPT.colorize(:red)
-          STDERR.puts parser.errors.join(", ")
+          parser.errors.each do |error|
+            STDERR.puts parser.formatted_error(error)
+          end
         else
           STDOUT.print ::REPL::PROMPT.colorize(:green)
           STDOUT.puts "#{program.statements.join(",", &.token)} = #{program.string}"

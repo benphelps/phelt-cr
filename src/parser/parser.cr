@@ -22,7 +22,7 @@ module Parser
   end
 
   class Parser
-    property errors : Array(String) = [] of String
+    property errors : Array(Tuple(Token::Token, String)) = [] of Tuple(Token::Token, String)
 
     @cur_token : Token::Token = Token::ILLEGAL
     @peek_token : Token::Token = Token::ILLEGAL
@@ -125,7 +125,7 @@ module Parser
 
     def parse_expression(precedence : Precedences)
       if !@prefix_parsers.has_key?(@cur_token.type)
-        @errors << "Unexpected #{@cur_token.type}"
+        @errors << {@cur_token, "Unexpected #{@cur_token.type}"} if @cur_token.is_a? Token::EOF
         return AST::EmptyExpression.new
       end
       prefix = @prefix_parsers[@cur_token.type]
@@ -176,9 +176,8 @@ module Parser
         value = @cur_token.literal.to_i64
 
         unless value
-          error = "could not parse #{@cur_token.literal} as an Int64"
-          @errors << error
-          return AST::ErrorExpression.new(token, error)
+          @errors << {@cur_token, "could not parse #{@cur_token.literal} as an Int64"}
+          return AST::ErrorExpression.new(token, @errors.last)
         end
 
         AST::IntegerLiteral.new(token, value)
@@ -193,9 +192,8 @@ module Parser
         value = @cur_token.literal.to_f
 
         unless value
-          error = "could not parse #{@cur_token.literal} as an Float64"
-          @errors << error
-          return AST::ErrorExpression.new(token, error)
+          @errors << {@cur_token, "could not parse #{@cur_token.literal} as an Float64"}
+          return AST::ErrorExpression.new(token, @errors.last)
         end
 
         AST::FloatLiteral.new(token, value)
@@ -425,7 +423,8 @@ module Parser
         initial = parse_statement()
 
         if !initial.is_a? AST::Statement
-          return AST::ErrorExpression.new(@cur_token, "Expected statement")
+          @errors << {token, "Expected statement"}
+          return AST::ErrorExpression.new(@cur_token, @errors.last)
         end
 
         next_token
@@ -566,7 +565,7 @@ module Parser
       next_token
 
       if (@cur_token.type != Token::IDENT.type)
-        errors << "Unexpected argument type #{@cur_token.type}, expected IDENT"
+        errors << {@cur_token, "Unexpected argument type #{@cur_token.type}, expected IDENT"}
       else
         identifiers << AST::Identifier.new(@cur_token, @cur_token.literal)
       end
@@ -576,7 +575,7 @@ module Parser
         next_token
 
         if (@cur_token.type != Token::IDENT.type)
-          errors << "Unexpected argument type #{@cur_token.type}, expected IDENT"
+          errors << {@cur_token, "Unexpected argument type #{@cur_token.type}, expected IDENT"}
         else
           identifiers << AST::Identifier.new(@cur_token, @cur_token.literal)
         end
@@ -693,7 +692,7 @@ module Parser
     end
 
     def peek_error(token : Token::Token)
-      @errors << "Expected next token to be #{token.type}, got #{@peek_token.type} instead"
+      @errors << {@peek_token, "Expected next token to be #{token.type}, got #{@peek_token.type} instead"}
     end
 
     def peek_precedence
@@ -710,6 +709,23 @@ module Parser
         return @precedences[@cur_token.type]
       end
       return Precedences::Lowest
+    end
+
+    def formatted_error(error : Tuple(Token::Token, ::String))
+      error_token, error_text = error[0], error[1]
+
+      pretty = "\nParse Error: #{error_text}".colorize(:red).to_s + "\n\n"
+
+      lines = @lexer.input.as(String).lines
+      line = "  #{error_token.line} | "
+      error_line = error_token.line - 1
+
+      pretty += "#{line.colorize(:dark_gray).to_s}#{lines[error_line]}\n"
+      pretty += (" " * ((error_token.column - 1) + line.size)) + "^".colorize(:green).to_s
+
+      pretty += "\n"
+
+      return pretty
     end
   end
 end
