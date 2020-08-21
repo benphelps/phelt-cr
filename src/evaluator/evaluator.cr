@@ -334,52 +334,60 @@ module Evaluator
       case object
       when PheltObject::Hash
         if object.pairs.has_key? index.hash_key
-          return object.pairs[index.hash_key].value
+          accessed = object.pairs[index.hash_key].value
+          if accessed.is_a? PheltObject::Function
+            args = [] of PheltObject::Object if args.nil?
+            return apply_function(accessed, args, env)
+          else
+            return accessed
+          end
         else
           return NULL
         end
       when PheltObject::String
-        return object_access_function(object, index, env, args)
+        return eval_internal_object_access(object, index, env, args)
       when PheltObject::Number
-        return object_access_function(object, index, env, args)
+        return eval_internal_object_access(object, index, env, args)
       when PheltObject::Array
-        return object_access_function(object, index, env, args)
+        return eval_internal_object_access(object, index, env, args)
       else
         return error("Unhandled object access for #{object.type}")
       end
     end
 
-    def object_access_function(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment, args : Array(PheltObject::Object)?)
+    def eval_internal_object_access(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment, args : Array(PheltObject::Object)?)
       if args.nil?
         args = [object] of PheltObject::Object
       else
         args.unshift object
       end
+
       object_internal = object.type.capitalize
       object_methods = env.get(object_internal)
-      global_methods = env.get("Object")
+
       if object_methods.is_a? PheltObject::Hash
         if object_methods.pairs.has_key? index.hash_key
           accessed = object_methods.pairs[index.hash_key].value
           if accessed.is_a? PheltObject::Function
             return apply_function(accessed, args, env)
-          end
-        elsif global_methods.is_a? PheltObject::Hash
-          if global_methods.pairs.has_key? index.hash_key
-            accessed = global_methods.pairs[index.hash_key].value
-            if accessed.is_a? PheltObject::Function
-              return apply_function(accessed, args, env)
-            end
+          else
+            return error("Attempt to call non function #{index.value}")
           end
         end
-      elsif global_methods.is_a? PheltObject::Hash
+      end
+
+      global_methods = env.get("Object")
+      if global_methods.is_a? PheltObject::Hash
         if global_methods.pairs.has_key? index.hash_key
           accessed = global_methods.pairs[index.hash_key].value
           if accessed.is_a? PheltObject::Function
             return apply_function(accessed, args, env)
+          else
+            return error("Attempt to call non function #{index.value}")
           end
         end
       end
+
       return error("Undefined function '#{index.value}' for #{object_internal}.")
     end
 

@@ -375,4 +375,16 @@ describe "Evaluator" do
       test_object(evaluated, test[:expected])
     end
   end
+
+  it "should evaluate builtin object access" do
+    tests = [
+      {input: "let foo = 1; foo.type", expected: "number"},
+      {input: "let foo = \"test\"; foo.reverse", expected: "tset"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
 end
