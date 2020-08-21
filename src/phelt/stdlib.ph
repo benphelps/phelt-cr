@@ -10,7 +10,7 @@ const String = {
     },
     reverse: fn(self) {
         let result = ""
-        let length = len(self) - 1
+        let length = self.length - 1
         for (let i = length; i >= 0; i -= 1) {
             result += self[i]
         }
