@@ -620,4 +620,40 @@ describe "Parser" do
     statement_exp.value.should eq("i")
     statement_exp.token_literal.should eq("i")
   end
+
+  it "should handle while expressions" do
+    input = "while(i < 10) { i }"
+
+    lexer = Lexer::Lexer.new(input)
+    parser = Parser::Parser.new(lexer)
+    program = parser.parse_program
+    check_parser_errors(parser)
+
+    program.should_not be_nil
+    program.statements.size.should eq(1)
+
+    program.statements[0].should be_a(AST::ExpressionStatement)
+    statement = program.statements[0].as(AST::ExpressionStatement)
+
+    statement.expression.should be_a(AST::WhileExpression)
+    while_exp = statement.expression.as(AST::WhileExpression)
+
+    while_exp.should be_a(AST::WhileExpression)
+
+    while_exp.condition.should be_a(AST::InfixExpression)
+    condition = while_exp.condition.as(AST::InfixExpression)
+    test_literal(condition.left, "i")
+    condition.operator.should eq("<")
+    test_literal(condition.right, 10_i64)
+
+    while_exp.statement.should be_a(AST::BlockStatement)
+    statement = while_exp.statement.as(AST::BlockStatement)
+    statement.statements.size.should eq(1)
+
+    statement_stmt = statement.statements[0].as(AST::ExpressionStatement)
+    statement_exp = statement_stmt.expression.as(AST::Identifier)
+
+    statement_exp.value.should eq("i")
+    statement_exp.token_literal.should eq("i")
+  end
 end

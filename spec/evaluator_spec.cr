@@ -208,6 +208,17 @@ describe "Evaluator" do
     end
   end
 
+  it "should evaluate while loops" do
+    tests = [
+      {input: "let array = []; let i = 0; while(i < 10) { i += 1; array_push(array, i) } array", expected: "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
   it "should evaluate assignment infix statements" do
     tests = [
       {input: "let foo = 5; foo += 5", expected: 10},
@@ -337,15 +348,26 @@ describe "Evaluator" do
 
   it "should evaluate array index expressions" do
     tests = [
-      {input: "{ foo: 1 }.foo", expected: 1},
+      {input: "{ foo: 1 }.foo", expected: 1_i64},
       {input: "{ foo: 1 }.bar", expected: nil},
-      {input: "{ foo: 1 }[\"foo\"]", expected: 1},
+      {input: "{ foo: 1 }[\"foo\"]", expected: 1_i64},
       {input: "{ foo: 1 }[\"bar\"]", expected: nil},
       {input: "{ 1: \"foo\" }[1]", expected: "foo"},
       {input: "{ 1: \"foo\" }[2]", expected: nil},
       {input: "{ }.foo", expected: nil},
       {input: "{ }[\"foo\"]", expected: nil},
-      {input: "let key = \"foo\"; { foo: 1 }[key] ", expected: 1},
+      {input: "let key = \"foo\"; { foo: 1 }[key] ", expected: 1_i64},
+    ]
+
+    tests.each do |test|
+      evaluated = eval(test[:input])
+      test_object(evaluated, test[:expected])
+    end
+  end
+
+  it "should evaluate object access" do
+    tests = [
+      {input: "let foo = { test: fn(x) { x + x} }; foo.test(5)", expected: 10_i64},
     ]
 
     tests.each do |test|

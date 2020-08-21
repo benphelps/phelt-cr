@@ -61,4 +61,5 @@ describe Lexer::Lexer do
   it_lexes "*=", Token::ASTERISK_ASSIGN
   it_lexes "/=", Token::SLASH_ASSIGN
   it_lexes "for", Token::FOR
+  it_lexes "while", Token::WHILE
 end
