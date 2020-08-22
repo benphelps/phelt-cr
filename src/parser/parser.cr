@@ -353,7 +353,6 @@ module Parser
         token = @cur_token
         operator = @cur_token.literal
         precedence = cur_precedence
-        next_token
         AST::InDecrementExpression.new(token, operator, left)
       end
 
