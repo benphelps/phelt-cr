@@ -554,10 +554,6 @@ module Evaluator
         return eval_string_infix_expression(operator, left, right)
       end
 
-      if left.class != right.class
-        return error("Expected #{left.type}, got #{right.type}")
-      end
-
       if operator == "=="
         return bool_to_boolean(left == right)
       end

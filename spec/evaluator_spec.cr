@@ -135,9 +135,9 @@ describe "Evaluator" do
 
   it "should handle errors" do
     tests = [
-      {:input => "if (5 > true) {\n  return true;\n}", :expected => "Expected number, got boolean"},
-      {:input => "if (true > 5) {\n  return true;\n}", :expected => "Expected boolean, got number"},
-      {:input => "if (5 > 1) {\n  return true + 5;\n}", :expected => "Expected boolean, got number"},
+      {:input => "if (5 > true) {\n  return true;\n}", :expected => "Unkown operator number > boolean"},
+      {:input => "if (true > 5) {\n  return true;\n}", :expected => "Unkown operator boolean > number"},
+      {:input => "if (5 > 1) {\n  return true + 5;\n}", :expected => "Unkown operator boolean + number"},
       {:input => "if (10 > 5) {\n  return -true;\n}", :expected => "Unkown operator -boolean"},
       {:input => "if (10 > 5) {\n  return true + false;\n}", :expected => "Unkown operator boolean + boolean"},
       {:input => "foobar;", :expected => "Undefined identifier foobar"},
@@ -346,15 +346,15 @@ describe "Evaluator" do
     end
   end
 
-  it "should evaluate array index expressions" do
+  it "should evaluate hash index expressions" do
     tests = [
       {input: "{ foo: 1 }.foo", expected: 1_i64},
-      {input: "{ foo: 1 }.bar", expected: nil},
+      {input: "{ foo: 1 }.bar", expected: "Undefined function 'bar' for Hash."},
       {input: "{ foo: 1 }[\"foo\"]", expected: 1_i64},
       {input: "{ foo: 1 }[\"bar\"]", expected: nil},
       {input: "{ 1: \"foo\" }[1]", expected: "foo"},
       {input: "{ 1: \"foo\" }[2]", expected: nil},
-      {input: "{ }.foo", expected: nil},
+      {input: "{ }.foo", expected: "Undefined function 'foo' for Hash."},
       {input: "{ }[\"foo\"]", expected: nil},
       {input: "let key = \"foo\"; { foo: 1 }[key] ", expected: 1_i64},
     ]
