@@ -28,7 +28,9 @@ module Evaluator
         parser = Parser::Parser.new(Lexer::Lexer.new(@@stdlib))
         program = parser.parse_program
         if (parser.errors.size > 0)
-          debug!(parser.errors)
+          parser.errors.each do |error|
+            STDERR.puts parser.formatted_error(error)
+          end
           exit(1)
         end
         result = eval(program, @env)
