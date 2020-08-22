@@ -59,6 +59,7 @@ module Parser
       register_parser_integer_literal
       register_parser_float_literal
       register_parser_boolean_literal
+      register_parser_null_literal
       register_parser_string_literal
       register_parser_prefix_expression
       register_parser_infix_expression
@@ -212,6 +213,17 @@ module Parser
 
       @prefix_parsers[Token::TRUE.type] = parser
       @prefix_parsers[Token::FALSE.type] = parser
+    end
+
+    def register_parser_null_literal
+      parser = PrefixParser.new do
+        token = @cur_token
+        value = @cur_token.type == Token::NULL.type
+
+        AST::NullLiteral.new(token)
+      end
+
+      @prefix_parsers[Token::NULL.type] = parser
     end
 
     def register_parser_string_literal

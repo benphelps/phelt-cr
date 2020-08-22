@@ -14,6 +14,7 @@ module Token
     "const"  => CONST,
     "true"   => TRUE,
     "false"  => FALSE,
+    "null"   => NULL,
     "if"     => IF,
     "else"   => ELSE,
     "return" => RETURN,
@@ -81,6 +82,7 @@ module Token
   CONST    = Token.new("CONST", "const")
   TRUE     = Token.new("TRUE", "true")
   FALSE    = Token.new("FALSE", "false")
+  NULL     = Token.new("NULL", "null")
   IF       = Token.new("IF", "if")
   ELSE     = Token.new("ELSE", "else")
   RETURN   = Token.new("RETURN", "return")

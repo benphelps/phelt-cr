@@ -62,6 +62,8 @@ module Evaluator
       when AST::BooleanLiteral
         @current_token = node.token
         return bool_to_boolean(node.value)
+      when AST::NullLiteral
+        return NULL
       when AST::StringLiteral
         return PheltObject::String.new(node.value)
       when AST::PrefixExpression
