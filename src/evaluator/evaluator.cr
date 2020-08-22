@@ -339,17 +339,7 @@ module Evaluator
     def eval_object_access_expression(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment, args : Array(PheltObject::Object)? = nil)
       case object
       when PheltObject::Hash
-        if object.pairs.has_key? index.hash_key
-          accessed = object.pairs[index.hash_key].value
-          if accessed.is_a? PheltObject::Function
-            args = [] of PheltObject::Object if args.nil?
-            return apply_function(accessed, args, env)
-          else
-            return accessed
-          end
-        else
-          return NULL
-        end
+        return eval_internal_object_access(object, index, env, args)
       when PheltObject::String
         return eval_internal_object_access(object, index, env, args)
       when PheltObject::Number
@@ -362,6 +352,18 @@ module Evaluator
     end
 
     def eval_internal_object_access(object : PheltObject::Object, index : PheltObject::String, env : PheltObject::Environment, args : Array(PheltObject::Object)?)
+      if object.is_a? PheltObject::Hash
+        if object.pairs.has_key? index.hash_key
+          accessed = object.pairs[index.hash_key].value
+          if accessed.is_a? PheltObject::Function
+            args = [] of PheltObject::Object if args.nil?
+            return apply_function(accessed, args, env)
+          else
+            return accessed
+          end
+        end
+      end
+
       if args.nil?
         args = [object] of PheltObject::Object
       else
