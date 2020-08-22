@@ -11,70 +11,79 @@ const String = {
     reverse: fn(self) {
         let result = ""
         let length = self.length - 1
-        for (let i = length; i >= 0; i -= 1) {
+        for (let i = length; i >= 0; i--) {
             result += self[i]
         }
-        result
+        return result
     }
 }
 
 const Number = {
     pow: fn(self, to) {
         let value = self
-        for(let i = 0; i < (to - 1); i += 1) {
+        for(let i = 0; i < (to - 1); i++) {
             value *= self
         }
         return value
     }
 }
 
+const Hash = {
+    has_key?: fn(self,  index) {
+        if (self[index] != null) {
+            return true
+        }
+        return false
+    }
+}
+
 const Array = {
     length: fn(self) {
-        object_length(self)
+        return object_length(self)
     },
     first: fn(self) {
-        array_first(self)
+        return array_first(self)
     },
     rest: fn(self) {
-        array_rest(self)
+        return array_rest(self)
     },
     last: fn(self) {
-        array_last(self)
+        return array_last(self)
     },
     push: fn(self, item) {
-        array_push(self, item)
+        return array_push(self, item)
     },
     pop: fn(self) {
-        array_pop(self)
+        return array_pop(self)
     },
     shift: fn(self) {
-        array_shift(self)
+        return array_shift(self)
     },
     unshift: fn(self, item) {
-        array_unshift(self, item)
+        return array_unshift(self, item)
     },
     map: fn(self, callback) {
         let iter = fn(array, accumulated) {
             if (object_length(array) == 0) {
-                accumulated
+                return accumulated
             } else {
-                iter(array_rest(array), array_push(accumulated, callback(array_first(array))))
+                return iter(array_rest(array), array_push(accumulated, callback(array_first(array))))
             }
         }
-        iter(self, [])
+        return iter(self, [])
     },
     reduce: fn(self, initial, callback) {
         let iter = fn(array, result) {
             if (object_length(array) == 0) {
-                result
+                return result
             } else {
-                iter(array_rest(array), callback(result, array_first(array)));
+                return iter(array_rest(array), callback(result, array_first(array)));
             }
         }
 
-        iter(self, initial);
+        return iter(self, initial);
     },
     sum: fn(self) {
-        Array["reduce"](self, 0, fn(i, e) { i + e })
+        return Array["reduce"](self, 0, fn(i, e) { i + e })
     }
 }
