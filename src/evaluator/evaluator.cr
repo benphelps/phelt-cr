@@ -48,32 +48,32 @@ module Evaluator
 
     def eval(node : AST::Node, env : PheltObject::Environment) : PheltObject::Object
       case node
-      when AST::Program
+      in AST::Program
         return eval_program(node.statements, env)
-      when AST::ExpressionStatement
+      in AST::ExpressionStatement
         @current_token = node.token
         return eval(node.expression, env)
-      when AST::BlockStatement
+      in AST::BlockStatement
         return eval_block_statement(node, env)
-      when AST::BreakStatement
+      in AST::BreakStatement
         return PheltObject::Break.new
-      when AST::IntegerLiteral
+      in AST::IntegerLiteral
         return PheltObject::Integer.new(node.value)
-      when AST::FloatLiteral
+      in AST::FloatLiteral
         return PheltObject::Float.new(node.value)
-      when AST::BooleanLiteral
+      in AST::BooleanLiteral
         @current_token = node.token
         return bool_to_boolean(node.value)
-      when AST::NullLiteral
+      in AST::NullLiteral
         return NULL
-      when AST::StringLiteral
+      in AST::StringLiteral
         return PheltObject::String.new(node.value)
-      when AST::PrefixExpression
+      in AST::PrefixExpression
         @current_token = node.right.token
         right = eval(node.right, env)
         return right if error?(right)
         return eval_prefix_expression(node, right, env)
-      when AST::InfixExpression
+      in AST::InfixExpression
         @current_token = node.left.token
         left = eval(node.left, env)
         return left if error?(left)
@@ -81,69 +81,69 @@ module Evaluator
         right = eval(node.right, env)
         return right if error?(right)
         return eval_infix_expression(node.operator, left, right)
-      when AST::AssignmentInfixExpression
+      in AST::AssignmentInfixExpression
         left = node.left
         @current_token = node.right.token
         right = eval(node.right, env)
         return right if error?(right)
         return eval_assignment_infix_expression(node.operator, left, right, env)
-      when AST::InDecrementExpression
+      in AST::InDecrementExpression
         left = node.left
         return eval_indecrement_infix_expression(node.operator, left, env)
-      when AST::IfExpression
+      in AST::IfExpression
         @current_token = node.condition.token
         return eval_if_expression(node, env)
-      when AST::ReturnStatement
+      in AST::ReturnStatement
         @current_token = node.token
         value = eval(node.return_value, env)
         return value if error?(value)
         return PheltObject::Return.new(value)
-      when AST::LetStatement
+      in AST::LetStatement
         @current_token = node.token
         value = eval(node.value, env)
         return value if error?(value)
         return error("Cannot redefine constant #{node.name.value}") if env.constant?(node.name.value)
         env.set(node.name.value, value)
-      when AST::ConstStatement
+      in AST::ConstStatement
         value = eval(node.value, env)
         return value if error?(value)
         return error("Cannot redefine constant #{node.name.value}") if env.constant?(node.name.value)
         env.set(node.name.value, value, true)
-      when AST::Identifier
+      in AST::Identifier
         return eval_identifier(node, env)
-      when AST::FunctionLiteral
+      in AST::FunctionLiteral
         params = node.parameters
         body = node.body
         return PheltObject::Function.new(params, body, env)
-      when AST::DoLiteral
+      in AST::DoLiteral
         body = node.body
         return eval_do(body, env)
-      when AST::CallExpression
+      in AST::CallExpression
         function = eval(node.function, env)
         return function if error?(function)
         args = eval_expressions(node.arguments, env)
         return args[0] if args.size == 1 && error?(args[0])
         return error("Object is not a function") if !function.is_a? PheltObject::Function | PheltObject::Builtin
         return apply_function(function.as(PheltObject::Function | PheltObject::Builtin), args, env)
-      when AST::ArrayLiteral
+      in AST::ArrayLiteral
         elements = eval_expressions(node.elements, env)
         return elements[0] if elements.size == 1 && error?(elements[0])
         return PheltObject::Array.new(elements)
-      when AST::HashLiteral
+      in AST::HashLiteral
         return eval_hash_literal(node, env)
-      when AST::IndexExpression
+      in AST::IndexExpression
         left = eval(node.left, env)
         return left if error?(left)
         index = eval(node.index, env)
         return index if error?(index)
         return eval_index_expression(left, index)
-      when AST::ObjectAccessExpression
+      in AST::ObjectAccessExpression
         @current_token = node.left.token
         left = eval(node.left, env)
         return left if error?(left)
         index = PheltObject::String.new(node.index.value)
         return eval_object_access_expression(left, index, env)
-      when AST::ObjectCallExpression
+      in AST::ObjectCallExpression
         @current_token = node.left.token
         left = eval(node.left, env)
         return left if error?(left)
@@ -151,11 +151,13 @@ module Evaluator
         args = eval_expressions(node.arguments, env)
         return args[0] if args.size == 1 && error?(args[0])
         return eval_object_access_expression(left, index, env, args)
-      when AST::ForExpression
+      in AST::ForExpression
         return eval_for(node, env)
-      when AST::WhileExpression
+      in AST::WhileExpression
         return eval_while(node, env)
-      else
+      in AST::Statement
+        return NULL
+      in AST::Expression
         return NULL
       end
     end
